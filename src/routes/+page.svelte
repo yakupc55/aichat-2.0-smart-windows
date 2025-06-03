@@ -51,7 +51,7 @@
 	<header>
 		🧠 {t('AppName')}
 
-		<label for="language-select">Dil Seçin:</label>
+		<label for="language-select">{t("ChooseLanguage")} :</label>
 		<select id="language-select" bind:value={$currentLanguage} on:change={(e) => changeLanguage(e.target.value)}>
             {#each languages as language}
                 <option value={language.code}>{language.label}</option>
@@ -236,10 +236,53 @@
 	button:hover {
 		background-color: #4338ca;
 	}
-	label {
-		margin-left: 40px;
-	}
-	select {
-		margin-left: 10px;
-	}
+/* Genel stil */
+label {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+	margin-left: 40px;
+    margin-right: 10px;
+    vertical-align: middle; /* Select ile aynı hizada olmasını sağlar */
+}
+
+select {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none; /* Tarayıcı varsayılan stilini kaldırır */
+    -webkit-appearance: none; /* Safari için */
+    -moz-appearance: none; /* Firefox için */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Özel bir ok ikonu */
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 16px 16px;
+}
+
+/* Hover efekti */
+select:hover {
+    border-color: #aaa;
+}
+
+/* Odaklandığında efekt */
+select:focus {
+    outline: none;
+    border-color: #4f46e5; /* Mavi vurgu */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* Hafif bir gölge */
+}
+
+/* Disabled durumu */
+select:disabled {
+    background-color: #f5f5f5;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
 </style>

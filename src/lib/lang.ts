@@ -1,7 +1,4 @@
 // src/lib/lang.ts
-
-import { writable } from 'svelte/store';
-import { browser } from "$app/environment"
 import { currentLanguage } from './stores';
 export const translations = {
     en: {
@@ -30,6 +27,8 @@ export const translations = {
         chatCalculate: 'Smart Calculate',
         FormulText:"Formula",
         CalculateText:"Calculate",
+        ChooseLanguage:"Choose Language",
+
     },
     tr: {
         AppName: 'AI Chat Uygulaması',
@@ -57,6 +56,7 @@ export const translations = {
         chatCalculate: 'Akıllı Hesaplayıcı',
         FormulText:"Formül",
         CalculateText:"Calculate",
+        ChooseLanguage:"Dil Seç",
     }
 };
 
@@ -76,7 +76,5 @@ export function t(key: string, params?: { [key: string]: string }) {
 }
 // Dili değiştirme ve localStorage'a kaydetme
 export function setLanguage(lang: string) {
-    console.log(lang);
-    
    currentLanguage.set(lang);
 }
