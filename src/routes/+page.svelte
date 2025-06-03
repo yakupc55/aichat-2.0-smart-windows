@@ -1,103 +1,127 @@
-
 <script lang="ts">
-	
-	import SystemMessage from '$lib/components/SystemMessage.svelte';
-	import { t,setLanguage} from '$lib/lang';
-	import { mockMessages } from '$lib/mockMessages2En';
-	import { currentLanguage } from '$lib/stores';
-	import type { Message } from '$lib/types';
-	// Mevcut dili almak için bir değişken tanımlayalım
 
-	// Dillerin listesi
-	const languages = [
-		{ code: 'en', label: 'English' },
-		{ code: 'tr', label: 'Türkçe' }
-	];
+    import SystemMessage from '$lib/components/SystemMessage.svelte';
+    import { t, setLanguage } from '$lib/lang';
+	import { chatStore } from '$lib/Stores/chatStore';
+	import { currentLanguage } from '$lib/Stores/LangStores';
+	import { parseSystemMessages } from '$lib/utils';
 
-	// Dil değiştirme işlevi
-	function changeLanguage(lang: string) {
-        setLanguage(lang); // Dili değiştir ve localStorage'a kaydet
-       	location.reload(); // Sayfayı yenile
-	}
+    const languages = [
+        { code: 'en', label: 'English' },
+        { code: 'tr', label: 'Türkçe' },
+    ];
 
-	let messages: Message[] = mockMessages;
-	let newMessage = '';
+    function changeLanguage(lang: string) {
+        setLanguage(lang);
+        location.reload();
+    }
 
-	function parseSystemMessages(content: string) {
-		const regex = /\[\[smart-window]\[([^\]]+)]\[([\s\S]*?)]]/g;
-		const parts: Array<{ type: 'text' | 'smart-window'; value: string; systemType?: string }> = [];
+    let newMessage = '';
+    let isStreaming = false; // Akış durumunu takip etmek için
 
-		let lastIndex = 0;
-		let match;
+    function sendMessage() {
+		isStreaming = false;
+        if (!newMessage.trim()) return;
+        chatStore.addMessage(newMessage);
+        newMessage = '';
+        isStreaming = true; // Akış başladı
+    }
 
-		while ((match = regex.exec(content)) !== null) {
-			if (match.index > lastIndex) {
-				parts.push({ type: 'text', value: content.slice(lastIndex, match.index) });
-			}
+    function resetChat() {
+        chatStore.reset(); // Sohbet geçmişini sıfırla
+    }
 
-			parts.push({ type: 'smart-window', systemType: match[1], value: match[2] });
-			lastIndex = regex.lastIndex;
-		}
-
-		if (lastIndex < content.length) {
-			parts.push({ type: 'text', value: content.slice(lastIndex) });
-		}
-
-		return parts;
-	}
+    function toggleStreaming() {
+        if (isStreaming) {
+            chatStore.stopStreaming(); // Akışı durdur
+            isStreaming = false;
+        } else {
+            // Akışı yeniden başlat (eğer gerekliyse)
+            console.log('Streaming restarted');
+            isStreaming = true;
+        }
+    }
 </script>
 
 <div class="container">
-	<header>
-		🧠 {t('AppName')}
+    <header>
+        🧠 {t('AppName')}
 
-		<label for="language-select">{t("ChooseLanguage")} :</label>
-		<select id="language-select" bind:value={$currentLanguage} on:change={(e) => changeLanguage(e.target.value)}>
+        <label for="language-select">{t("ChooseLanguage")} :</label>
+        <select id="language-select" bind:value={$currentLanguage} on:change={(e) => changeLanguage(e.target.value)}>
             {#each languages as language}
                 <option value={language.code}>{language.label}</option>
             {/each}
         </select>
-	</header>
+    </header>
 
-	<main>
-		{#each messages as msg (msg.id)}
-			<div class="message-row {msg.sender === 'user' ? 'user' : 'bot'}">
-				<div class="bubble {msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'}">
-					{#each parseSystemMessages(msg.content) as part}
-						{#if part.type === 'text'}
-							<span>{part.value}</span>
-						{:else}
-							<SystemMessage type={part.systemType} value={part.value} />
-						{/if}
-					{/each}
-				</div>
-			</div>
-		{/each}
-	</main>
+    <main>
+        {#if $chatStore.length === 0}
+            <div class="empty-chat-message">
+                {t('StartNewChat')}
+            </div>
+        {:else}
+            {#each $chatStore as msg (msg.id)}
+                <div class="message-row {msg.sender === 'user' ? 'user' : 'bot'}">
+                    <div class="bubble {msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'}">
+                        {#each parseSystemMessages(msg.content) as part}
+                            {#if part.type === 'text'}
+                                <span>{part.value}</span>
+                            {:else}
+                                <SystemMessage type={part.systemType} value={part.value} />
+                            {/if}
+                        {/each}
+                    </div>
+                </div>
+            {/each}
+        {/if}
+    </main>
 
-	<footer>
-		<form
-			on:submit|preventDefault={() => {
-				if (!newMessage.trim()) return;
-				messages = [
-					...messages,
-					{
-						id: crypto.randomUUID(),
-						sender: 'user',
-						content: newMessage,
-						timestamp: new Date()
-					}
-				];
-				newMessage = '';
-			}}
-		>
-			<input type="text" placeholder={t('writeMessage')} bind:value={newMessage} />
-			<button type="submit">{t('send')}</button>
-		</form>
-	</footer>
+    <footer>
+        <form on:submit|preventDefault={sendMessage}>
+            <input type="text" placeholder={t('writeMessage')} bind:value={newMessage} />
+            <button type="submit">{t('send')}</button>
+			 <button class="reset-button" on:click={resetChat}>
+            🔄 {t('ResetChat')}
+        </button>
+
+        <!-- Play/Stop Düğmesi -->
+        <button class="play-stop-button" on:click={toggleStreaming}>
+            {#if isStreaming}
+                ⏹️
+            {:else}
+                ▶️ 
+            {/if}
+        </button>
+        </form>
+
+        <!-- Sıfırlama Düğmesi -->
+        
+    </footer>
 </div>
 
 <style>
+    .empty-chat-message {
+        text-align: center;
+        font-style: italic;
+        color: #666;
+        margin-top: 20px;
+    }
+
+    .reset-button {
+		background-color: #e54646;
+		color: white;
+		padding: 0.75rem 1.5rem;
+		border: none;
+		border-radius: 9999px;
+		cursor: pointer;
+		font-weight: 500;
+		transition: background-color 0.2s;
+    }
+
+    .reset-button:hover {
+        background-color: #e63939;
+    }
 	body,
 	html {
 		margin: 0;
@@ -158,14 +182,14 @@
 	}
 
 	.user-bubble {
-		background-color: #4f46e5;
-		color: white;
+		background-color: #a5a0ff;
+		color: rgb(7, 6, 6);
 		border-bottom-right-radius: 4px;
 	}
 
 	.bot-bubble {
 		background-color: white;
-		color: #333;
+		color: #000000;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 		border-bottom-left-radius: 4px;
 	}
@@ -178,7 +202,7 @@
 		bottom: 0;
 		width: 0;
 		height: 0;
-		border-left: 8px solid #4f46e5;
+		border-left: 8px solid #9995dd;
 		border-top: 8px solid transparent;
 		border-bottom: 8px solid transparent;
 	}

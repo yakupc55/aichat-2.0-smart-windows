@@ -1,5 +1,5 @@
 // src/lib/lang.ts
-import { currentLanguage } from './stores';
+import { currentLanguage } from './Stores/LangStores';
 export const translations = {
     en: {
         AppName: 'AI Chat 2.0',
@@ -25,13 +25,15 @@ export const translations = {
         wrongAnswer: '❌ Wrong! The correct answer is: <strong>{correctAnswer}</strong>',
         newQuestionButton: 'New Question',
         chatCalculate: 'Smart Calculate',
-        FormulText:"Formula",
-        CalculateText:"Calculate",
-        ChooseLanguage:"Choose Language",
+        FormulText: "Formula",
+        CalculateText: "Calculate",
+        ChooseLanguage: "Choose Language",
+        ResetChat: 'Reset Chat',
+        StartNewChat: 'Start a new chat!',
 
     },
     tr: {
-        AppName: 'AI Chat Uygulaması',
+        AppName: 'YZ Sohbet 2.0',
         send: 'Gönder',
         writeMessage: "Mesaj yaz...",
         smartWindow: "Akıllı Pencere",
@@ -54,9 +56,11 @@ export const translations = {
         wrongAnswer: '❌ Yanlış! Doğru cevap: <strong>{correctAnswer}</strong>',
         newQuestionButton: 'Yeni Soru',
         chatCalculate: 'Akıllı Hesaplayıcı',
-        FormulText:"Formül",
-        CalculateText:"Calculate",
-        ChooseLanguage:"Dil Seç",
+        FormulText: "Formül",
+        CalculateText: "Calculate",
+        ChooseLanguage: "Dil Seç",
+        ResetChat: 'Sohbeti Sıfırla',
+        StartNewChat: 'Yeni bir sohbet başlatın!',
     }
 };
 
@@ -76,5 +80,5 @@ export function t(key: string, params?: { [key: string]: string }) {
 }
 // Dili değiştirme ve localStorage'a kaydetme
 export function setLanguage(lang: string) {
-   currentLanguage.set(lang);
+    currentLanguage.set(lang);
 }
