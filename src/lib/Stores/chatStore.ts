@@ -9,10 +9,12 @@ export type Message = {
 };
 
 function createChatStore() {
-    const { subscribe, update,set } = writable<Message[]>([]);
+    const { subscribe, update, set } = writable<Message[]>([]);
+    const isStreaming = writable(false); // isStreaming'i bir writable store olarak tanımla
 
     return {
         subscribe,
+        isStreaming, // isStreaming'i dışarıya aç
 
         async addMessage(userMessage: string) {
             const newMessage: Message = {
@@ -42,18 +44,28 @@ function createChatStore() {
             // Bot mesajını mağazaya ekleyelim (başlangıçta boş içerik)
             update((messages) => [...messages, botMessage]);
 
-            // Yanıtı akış halinde işle
-            for await (const chunk of streamOllamaResponse(conversationHistory)) {
-                update((messages) => {
-                    const updatedMessages = [...messages];
-                    const lastMessage = updatedMessages[updatedMessages.length - 1];
+            // Akış başladı
+            isStreaming.set(true);
 
-                    if (lastMessage.sender === 'bot') {
-                        lastMessage.content += chunk; // Bot mesajına parça ekleyelim
-                    }
+            try {
+                // Yanıtı akış halinde işle
+                for await (const chunk of streamOllamaResponse(conversationHistory)) {
+                    update((messages) => {
+                        const updatedMessages = [...messages];
+                        const lastMessage = updatedMessages[updatedMessages.length - 1];
 
-                    return updatedMessages;
-                });
+                        if (lastMessage.sender === 'bot') {
+                            lastMessage.content += chunk; // Bot mesajına parça ekleyelim
+                        }
+
+                        return updatedMessages;
+                    });
+                }
+            } catch (error) {
+                console.error('Streaming error:', error);
+            } finally {
+                // Akış tamamlandı veya durduruldu
+                isStreaming.set(false);
             }
         },
 
@@ -70,10 +82,13 @@ function createChatStore() {
 
         reset() {
             set([]); // Sohbet geçmişini sıfırla
+            isStreaming.set(false); // Akış durumunu sıfırla
         },
-        stopStreaming(){
-        ollamaStreamAbort();
-        }
+
+        stopStreaming() {
+            ollamaStreamAbort(); // Akışı durdur
+            isStreaming.set(false); // Akış durumu false olsun
+        },
     };
 }
 
