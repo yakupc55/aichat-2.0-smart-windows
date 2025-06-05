@@ -1,9 +1,10 @@
 // src/lib/chatStore.ts
-import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
+import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioService';
+//import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
 import { writable } from 'svelte/store';
 export type Message = {
     id: string;
-    sender: 'user' | 'bot';
+    sender: 'user' | 'assistant';
     content: string;
     timestamp: Date;
 };
@@ -30,13 +31,12 @@ function createChatStore() {
             // Bot'un yanıtını alalım
             const conversationHistory = [
                 ...this.getConversationHistory(),
-                { role: 'user', content: userMessage },
             ];
 
             // Bot mesajını oluştur
             const botMessage: Message = {
                 id: crypto.randomUUID(),
-                sender: 'bot',
+                sender: 'assistant',
                 content: '',
                 timestamp: new Date(),
             };
@@ -49,12 +49,16 @@ function createChatStore() {
 
             try {
                 // Yanıtı akış halinde işle
-                for await (const chunk of streamOllamaResponse(conversationHistory)) {
+                // console.log("Sohbet geçmişi apiye gönderiliyor:");
+                // console.log(JSON.stringify(conversationHistory, null, 2));
+                //for await (const chunk of streamOllamaResponse(conversationHistory)) {
+
+                for await (const chunk of streamLMStudioResponse(conversationHistory)) {
                     update((messages) => {
                         const updatedMessages = [...messages];
                         const lastMessage = updatedMessages[updatedMessages.length - 1];
 
-                        if (lastMessage.sender === 'bot') {
+                        if (lastMessage.sender === 'assistant') {
                             lastMessage.content += chunk; // Bot mesajına parça ekleyelim
                         }
 
@@ -86,7 +90,8 @@ function createChatStore() {
         },
 
         stopStreaming() {
-            ollamaStreamAbort(); // Akışı durdur
+            //ollamaStreamAbort(); // Akışı durdur
+            lmStudioStreamAbort();
             isStreaming.set(false); // Akış durumu false olsun
         },
     };
