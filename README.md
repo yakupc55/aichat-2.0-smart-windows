@@ -1,38 +1,33 @@
-# sv
+# AI-Chat 2.0 / Smart Windows / Smart Calculate
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+It's time to bring a fresh perspective to AI conversations with AI-Chat 2.0, which is fundamentally activated by its smart computation structure.
 
-## Creating a project
+![AI-Chat 2.0 Screenshot](./en-main.png)
+## 🤖 AI Model
 
-If you're seeing this, you've probably already done this step. Congrats!
+This project integrates a custom-tuned model hosted on Hugging Face:
+
+- 🔗 **Base Model:** (test model / seed=3407 /only english) [yakupc55/gemma3-1b-Smart-Windows-gguf](https://huggingface.co/yakupc55/gemma3-1b-Smart-Windows-gguf)
+- 📊 **Dataset:** (test dataset / only 6 datas) [yakupc55/smart-windows](https://huggingface.co/datasets/yakupc55/smart-windows)
+
+## 🚀 Features
+
+- 🧠 AI-powered smart windows
+
+## 🛠️ Technologies
+
+- [Svelte](https://svelte.dev/)
+- JavaScript
+
+## 📦 Installation
 
 ```bash
-# create a new project in the current directory
-npx sv create
+# Clone the repository
+git clone https://github.com/yourusername/ai-chat-2.0.git
+cd ai-chat-2.0
 
-# create a new project in my-app
-npx sv create my-app
-```
+# Install dependencies
+npm install
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
+# Run the development server
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
