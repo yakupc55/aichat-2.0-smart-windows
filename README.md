@@ -13,6 +13,7 @@ This project integrates a custom-tuned model hosted on Hugging Face:
 ## 🚀 Features
 
 - 🧠 AI-powered smart windows
+- LM Studio api connection
 
 ## 🛠️ Technologies
 
