@@ -12,7 +12,7 @@ export async function* streamLMStudioResponse(messages: { role: string; content:
                 // 'Authorization': `Bearer ${YOUR_API_KEY}`,
             },
             body: JSON.stringify({
-                model: 'gemma3-1b-smart-windows', // LM Studio'da yüklü modelin adı
+                model: 'gemma3-1b-smartwindows', // LM Studio'da yüklü modelin adı
                 messages: messages,
                 stream: true,
             }),
