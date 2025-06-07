@@ -1,6 +1,6 @@
 # AI-Chat 2.0 / Smart Windows / Smart Calculate
 
-It's time to bring a fresh perspective to AI conversations with AI-Chat 2.0, which is fundamentally activated by its smart computation structure.
+It's time to bring a fresh perspective to AI conversations with AI-Chat 2.0. With its smart window system, this project takes AI-user interaction to the next level. Currently, it is in its initial test phase and actively running with intelligent calculation features.
 
 ![AI-Chat 2.0 Screenshot](./en-main.png)
 ## 🤖 AI Model
@@ -13,6 +13,7 @@ This project integrates a custom-tuned model hosted on Hugging Face:
 ## 🚀 Features
 
 - 🧠 AI-powered smart windows
+- LM Studio api connection
 
 ## 🛠️ Technologies
 
