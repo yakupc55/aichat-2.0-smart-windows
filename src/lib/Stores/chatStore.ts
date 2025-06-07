@@ -1,5 +1,6 @@
 // src/lib/chatStore.ts
-import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioService';
+//import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioService';
+import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioServiceWithAddFeatureApi';
 //import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
 import { writable } from 'svelte/store';
 export type Message = {
