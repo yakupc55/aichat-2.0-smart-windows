@@ -30,6 +30,21 @@ export const translations = {
         ChooseLanguage: "Choose Language",
         ResetChat: 'Reset Chat',
         StartNewChat: 'Start a new chat!',
+        noSmartWindow: 'A smart window of this type is not configured: or the process is still in progress',
+         // Quiz çevirileri
+        questionText: "Question",
+        wordQuestionText: 'What is the meaning of "{0}"?',
+        selectOptionText: "Please select an option",
+        checkAnswerText: "Check Answer",
+        nextQuestionText: "Next Question",
+        restartQuizText: "Restart Quiz",
+        correctAnswerText: "✅ Correct Answer!",
+        wrongAnswerText: "❌ Wrong Answer!",
+        showExplanationText: "Show Explanation",
+        hideExplanationText: "Hide Explanation",
+        explanationText: "Explanation",
+        quizCompleteText: "Quiz Completed! Your Score: {score}/{totalQuestions} (%{percentage})",
+        ofText: "of"
 
     },
     tr: {
@@ -61,6 +76,21 @@ export const translations = {
         ChooseLanguage: "Dil Seç",
         ResetChat: 'Sohbeti Sıfırla',
         StartNewChat: 'Yeni bir sohbet başlatın!',
+        noSmartWindow: 'Bu türde bir smart window yapılandırılmamış: yada daha işlem devam ediyor ',
+        // Quiz çevirileri
+        questionText: "Soru",
+        wordQuestionText: '"{0}" kelimesinin anlamı nedir?',
+        selectOptionText: "Lütfen bir seçenek belirleyin",
+        checkAnswerText: "Cevapla",
+        nextQuestionText: "Sonraki Soru",
+        restartQuizText: "Testi Yeniden Başlat",
+        correctAnswerText: "✅ Doğru Cevap!",
+        wrongAnswerText: "❌ Yanlış Cevap!",
+        showExplanationText: "Açıklamayı Göster",
+        hideExplanationText: "Açıklamayı Gizle",
+        explanationText: "Açıklama",
+        quizCompleteText: "Test Tamamlandı! Skorunuz: {score}/{totalQuestions} (%{percentage})",
+        ofText: "/"
     }
 };
 

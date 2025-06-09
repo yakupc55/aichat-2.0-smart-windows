@@ -64,7 +64,7 @@
                             {#if part.type === 'text'}
                                 <span>{part.value}</span>
                             {:else}
-                                <SystemMessage type={part.systemType} value={part.value} />
+                                <SystemMessage type={part.systemType} value={part.value} allText={part.allText} />
                             {/if}
                         {/each}
                     </div>
