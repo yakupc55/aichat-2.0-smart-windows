@@ -162,8 +162,8 @@
 
     .bubble {
         position: relative;
-        padding: 0.8rem 1rem;
-        max-width: 75%;
+        padding: 0.4rem 0.5rem;
+        max-width: 85%;
         border-radius: 18px;
         font-size: 0.95rem;
         line-height: 1.4;

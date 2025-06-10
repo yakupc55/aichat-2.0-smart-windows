@@ -55,11 +55,11 @@
 
 <style>
     .window-container {
-        margin: 1rem 0;
+        margin: 0.25rem 0;
         border: 1px solid #d1d5db;
         border-radius: 12px;
         background: #ffffff;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         overflow: hidden;
         font-family: sans-serif;
     }
@@ -67,20 +67,20 @@
     .header {
         background-color: #4f46e5;
         color: white;
-        padding: 0.75rem 1rem;
+        padding: 0.25rem 0.25rem;
         font-weight: bold;
         font-size: 1rem;
     }
 
     .content {
-        padding: 1rem;
+        padding: 0.25rem;
     }
 
     .toggle-raw-text {
         display: inline-block;
-        margin-top: 0.5rem;
-        padding: 0.5rem 0.5rem;
-        background-color: rgb(149, 147, 190);
+        margin-top: 0.4rem;
+        padding: 0.4rem 0.4rem;
+        background-color: rgb(96, 91, 194);
         color: white;
         border: none;
         border-radius: 6px;
@@ -93,8 +93,8 @@
     }
 
     .raw-text {
-        margin-top: 1rem;
-        padding: 1rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
         background-color: #f9fafb;
         border: 1px solid #e5e7eb;
         border-radius: 6px;
