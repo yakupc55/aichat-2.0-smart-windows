@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { t } from "$lib/lang";
+	import { createMapFromSplitData, splitDataByLevel } from "$lib/utils3";
 
   export let value: string;
+console.log("value",value);
 
     type QuizType = 'word' | 'knowledge';
   type Question = {
@@ -25,14 +27,38 @@
    $: {
    try {
    // value +="]";
+   /*
      const titleMatch = value.match(/title=['"]([^'"]+)['"]/);
     const typeMatch = value.match(/type=['"]([^'"]+)['"]/);
     const questionsMatch = value.match(/questions\s*=\s*([\s\S]*)/);
+*/  const splitData = splitDataByLevel(value, 0);
+    const valuesDatas = createMapFromSplitData(splitData, 1);
+    console.log('values data: ', valuesDatas);
+    title = valuesDatas.get('title');
+    quizType = valuesDatas.get('type');
+    const questionsData: string[] = valuesDatas.get('questions');
+    if(questions.length<1){
+      questionsData.forEach((data) => {
+        let splitData = splitDataByLevel(data, 2);
+        console.log("split data",splitData);
+        
+        const inputData = createMapFromSplitData(splitData, 3);
+        console.log("input data",inputData);
+        console.log("options",inputData.get('options'));
+        
+        questions.push({
+                    question: inputData.get('question'),
+          explanation: inputData.get('explanation'),
+         options: inputData.get('options'),
+          answer: inputData.get('answer')
+        });
+      });
+      totalQuestions = questions.length;
+    }
 
-    title = titleMatch?.[1] ?? '';
-    quizType = (typeMatch?.[1] as QuizType) ?? 'word';
-
-    if (questionsMatch?.[1]) {
+    //title = titleMatch?.[1] ?? '';
+    //quizType = (typeMatch?.[1] as QuizType) ?? 'word';
+/*if (questionsMatch?.[1]) {
       const jsonString = questionsMatch[1]
         .replace(/(\w+)\s*:/g, '"$1":')
         .replace(/'/g, '"')
@@ -46,7 +72,7 @@
     } else {
       questions = [];
       totalQuestions = 0;
-    }
+    }*/
   } catch (err) {
     console.error("Error parsing value:", err);
     questions = [];

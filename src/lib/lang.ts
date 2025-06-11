@@ -29,7 +29,7 @@ export const translations = {
         CalculateText: "Calculate",
         ChooseLanguage: "Choose Language",
         ResetChat: 'Reset Chat',
-        StartNewChat: 'Start a new chat!',
+        StartNewChat: 'Since we use Google},\'s free API, your data processed according to Google policies may be used to improve Google models. Therefore, refrain from sharing your sensitive data.',
         noSmartWindow: 'A smart window of this type is not configured: or the process is still in progress',
          // Quiz çevirileri
         questionText: "Question",
@@ -75,7 +75,7 @@ export const translations = {
         CalculateText: "Calculate",
         ChooseLanguage: "Dil Seç",
         ResetChat: 'Sohbeti Sıfırla',
-        StartNewChat: 'Yeni bir sohbet başlatın!',
+        StartNewChat: 'Google\'ın ücretsiz API\'sini kullandığımız için, Google politikalarına göre işlem gören verileriniz, Google modellerini geliştirmek için kullanılabilir. Bu nedenle hassas verilerinizi paylaşmaktan kaçının.',
         noSmartWindow: 'Bu türde bir smart window yapılandırılmamış: yada daha işlem devam ediyor ',
         // Quiz çevirileri
         questionText: "Soru",

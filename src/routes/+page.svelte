@@ -4,7 +4,7 @@
     import { t, setLanguage } from '$lib/lang';
 	import { chatStore } from '$lib/Stores/chatStore';
 	import { currentLanguage } from '$lib/Stores/LangStores';
-	import { parseSystemMessages } from '$lib/utils';
+	import { parseSystemMessages } from '$lib/utils3';
 	import { writable } from 'svelte/store';
 
     const languages = [

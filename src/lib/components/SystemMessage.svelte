@@ -6,7 +6,8 @@
     export let type: string;
     export let value: string;
     export let allText: string;
-
+    console.log("type",type);
+    
     // Anahtar: tüm smart-window türlerini burada eşleştiriyoruz
     let titleMap: Record<string, string> = {
         'chat-calculate': t('chatCalculate'),
