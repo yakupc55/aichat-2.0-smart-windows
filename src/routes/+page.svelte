@@ -116,6 +116,7 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 97vh;
+        max-height: 99vh;
 	}
 
 	header {
@@ -133,10 +134,10 @@
 	main {
 		flex: 1;
 		overflow-y: auto;
-		padding: 0.25rem 0.25rem;
+		padding: 0.5rem 0rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.8rem;
 		max-width: 700px;
 		margin: 0 auto;
 		width: 100%;
@@ -171,8 +172,8 @@
 
 	.bubble {
 		position: relative;
-		padding: 0.4rem 0.5rem;
-		max-width: 85%;
+		padding: 0.8rem 0.5rem;
+		max-width: 90%;
 		border-radius: 18px;
 		font-size: 0.95rem;
 		line-height: 1.4;
