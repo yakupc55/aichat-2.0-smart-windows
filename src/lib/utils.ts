@@ -14,7 +14,6 @@ export function parseSystemMessages(content: string) {
     // console.log("akış durdu.");
     const datas = content.split(/🛠️(.*?)🛠️/); // Regex'e göre böler
     // console.log("datas",datas);
-    
     if(datas.length>1){
         const smartWindowData = datas[1].split("🧲");
         // console.log("smartda data", smartWindowData);
@@ -27,7 +26,13 @@ export function parseSystemMessages(content: string) {
         parts.push({ type: 'smart-window', systemType:systemType, value: typeValue ,allText:content});
         parts.push({ type: 'text', value: datas[2] ,allText:content});
     }else{
-        parts.push({ type: 'text', value: datas[0] ,allText:content});
+        
+        if(datas[0].includes("🛠️smart-window🧲")){
+        //parts.push({ type: 'text', value: datas[0] ,allText:content});
+        parts.push({ type: 'smart-window', systemType:"", value: "" ,allText:content});
+        }else{
+          parts.push({ type: 'text', value: datas[0] ,allText:content});
+        }
     }
     
     return parts;

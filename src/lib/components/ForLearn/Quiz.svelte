@@ -69,9 +69,8 @@ type WordPair = {
           answer: inputData.get('answer')
         });
       });
-      totalQuestions = questions.length;
     }
-
+    totalQuestions = questions.length;
     }
 
   } catch (err) {
