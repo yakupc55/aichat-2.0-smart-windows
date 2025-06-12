@@ -3,7 +3,7 @@
 	console.log('value');
 	console.log(value);
 	import { t } from '$lib/lang';
-	import { createMapFromSplitData, splitDataByLevel } from '$lib/utils3';
+	import { createMapFromSplitData, splitDataByLevel } from '$lib/utils';
 	let title = '';
 	let formula = '';
 	let resultKey = 'sonuç';
@@ -26,20 +26,7 @@
 			const splitData = splitDataByLevel(value, 0);
 			console.log('split,data', splitData);
 
-			/* const titleMatch = value.match(/title=['"]([^'"]+)['"]/);
-      const formulaMatch = value.match(/formula=['"]([^'"]+)['"]/);
-      const resultKeyMatch = value.match(/resultKey=['"]([^'"]+)['"]/);
-      const unitMatch = value.match(/unit=['"]([^'"]+)['"]/);
-      const inputsMatch = value.match(/inputs=\[([^\]]*)\]/);*/
-
-			/*title = titleMatch?.[1] ?? '';
-      formula = formulaMatch?.[1] ?? '';
-      resultKey = resultKeyMatch?.[1] ?? 'sonuç';
-      unit = unitMatch?.[1] ?? '';*
-
-      */
 			const valuesDatas = createMapFromSplitData(splitData, 1);
-
 			//console.log('values data: ', valuesDatas);
 
 			title = valuesDatas.get('title');

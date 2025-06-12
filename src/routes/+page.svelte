@@ -3,7 +3,7 @@
 	import { t, setLanguage } from '$lib/lang';
 	import { chatStore } from '$lib/Stores/chatStore';
 	import { currentLanguage } from '$lib/Stores/LangStores';
-	import { parseSystemMessages } from '$lib/utils3';
+	import { parseSystemMessages } from '$lib/utils';
 	import { writable } from 'svelte/store';
 
 	const languages = [
@@ -133,10 +133,10 @@
 	main {
 		flex: 1;
 		overflow-y: auto;
-		padding: 2rem 1rem;
+		padding: 0.25rem 0.25rem;
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.25rem;
 		max-width: 700px;
 		margin: 0 auto;
 		width: 100%;
@@ -182,14 +182,14 @@
 	.user-bubble {
 		background-color: #a5a0ff;
 		color: rgb(7, 6, 6);
-		border-bottom-right-radius: 4px;
+		/* border-bottom-right-radius: 4px; */
 	}
 
 	.bot-bubble {
 		background-color: white;
 		color: #000000;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-		border-bottom-left-radius: 4px;
+		/* border-bottom-left-radius: 4px; */
 	}
 
 	.user-bubble::after {
@@ -199,9 +199,9 @@
 		bottom: 0;
 		width: 0;
 		height: 0;
-		border-left: 8px solid #9995dd;
+		/* border-left: 8px solid #9995dd;
 		border-top: 8px solid transparent;
-		border-bottom: 8px solid transparent;
+		border-bottom: 8px solid transparent; */
 	}
 
 	.bot-bubble::after {
@@ -211,9 +211,9 @@
 		bottom: 0;
 		width: 0;
 		height: 0;
-		border-right: 8px solid white;
+		/* border-right: 8px solid white;
 		border-top: 8px solid transparent;
-		border-bottom: 8px solid transparent;
+		border-bottom: 8px solid transparent; */
 	}
 
 	footer {

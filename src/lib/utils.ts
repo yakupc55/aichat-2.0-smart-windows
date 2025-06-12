@@ -1,64 +1,73 @@
 export function parseSystemMessages(content: string) {
     const parts: Array<{ type: 'text' | 'smart-window'; value: string; systemType?: string ;allText:string}> = [];
     let currentIndex = 0;
-
+    // console.log("current index",currentIndex);
+    // console.log("content",content);
     while (currentIndex < content.length) {
-        // Bir sonraki [[smart-window]] bloğunun başlangıcını bul
-        const startIndex = content.indexOf('[[smart-window]', currentIndex);
-        if (startIndex === -1) {
-            // Artık [[smart-window]] bloğu kalmadı, kalan tüm metni işle
-            parts.push({ type: 'text', value: content.slice(currentIndex) ,allText:content});
-            break;
-        }
 
-        // Önceki metni işle
-        if (startIndex > currentIndex) {
-            parts.push({ type: 'text', value: content.slice(currentIndex, startIndex) ,allText:content});
-        }
-
-        // [[smart-window]] bloğunun bitişini bul
-        const endIndex = findClosingBracket(content, startIndex);
-        if (endIndex === -1) {
-           // throw new Error("Geçersiz [[smart-window]] yapısı: Kapanış bulunamadı.");
-        }
-
-        // Bloğu işle
-        const block = content.slice(startIndex, endIndex + 2); // +2: ']]' kısmını da dahil et
-        const parsedBlock = parseSmartWindowBlock(block);
-        parts.push(parsedBlock);
-
-        // currentIndex'i güncelle
-        currentIndex = endIndex + 2;
+        currentIndex++;
+         //console.log("akış devam ediyor");
+         //parts.push({ type: 'text', value: "quiz" ,allText:content});
     }
-
+    // console.log("current index",currentIndex);
+    // console.log("content",content);
+    // console.log("akış durdu.");
+    const datas = content.split(/🛠️(.*?)🛠️/); // Regex'e göre böler
+    // console.log("datas",datas);
+    
+    if(datas.length>1){
+        const smartWindowData = datas[1].split("🧲");
+        // console.log("smartda data", smartWindowData);
+        
+        const systemType = smartWindowData[1];
+        // console.log("syteme type0",systemType);
+        
+        const typeValue = smartWindowData[2];
+        parts.push({ type: 'text', value: datas[0] ,allText:content});
+        parts.push({ type: 'smart-window', systemType:systemType, value: typeValue ,allText:content});
+        parts.push({ type: 'text', value: datas[2] ,allText:content});
+    }else{
+        parts.push({ type: 'text', value: datas[0] ,allText:content});
+    }
+    
     return parts;
 }
+const emojiArray: string[] = ["🚀", "🌟", "⚡","🛢️","🧫"];
+export function splitDataByLevel(data: string, splitLevel: number): string[] {
+    // Emoji array'ı tanımlıyoruz
+    const emojiArray: string[] = ["🚀", "🌟", "⚡","🛢️","🧫"];
 
-function findClosingBracket(content: string, startIndex: number): number {
-    let openBrackets = 0;
-    for (let i = startIndex; i < content.length; i++) {
-        if (content[i] === '[') openBrackets++;
-        if (content[i] === ']') openBrackets--;
-        if (openBrackets === 0) return i;
+    // Split level'in geçerli olup olmadığını kontrol ediyoruz
+    if (splitLevel < 0 || splitLevel >= emojiArray.length) {
+        throw new Error(`Geçersiz splitLevel değeri. Level 0 ile ${emojiArray.length - 1} arasında olmalıdır.`);
     }
-    //return -1; // Kapanış bulunamadı
+
+    // Seçilen emoji'yi alıyoruz
+    const selectedEmoji: string = emojiArray[splitLevel];
+
+    // String'i seçilen emojiye göre bölüyoruz
+    const resultArray: string[] = data.split(selectedEmoji);
+
+    return resultArray;
 }
 
-function parseSmartWindowBlock(block: string) {
-    // Block: "[[smart-window][quiz][...]]"
-    const regex = /\[\[smart-window\]\[([^\]]+)\]\[([\s\S]*)\]\]/;
-    const match = block.match(regex);
-    if (!match) {
-        //throw new Error("Geçersiz [[smart-window]] formatı.");
-        return block;
-    }
-    else{
-        return {
-        type: 'smart-window',
-        systemType: match[1],
-        value: match[2],
-        allText:block
-    };
-    }
-
+export function createMapFromSplitData(splitData : string [], splitLevel = 1) {
+  const valuesDatas = new Map();
+  
+  splitData.forEach(data => {
+    const split = splitDataByLevel(data,splitLevel);
+      if(split.length<3 && !data.includes(emojiArray[splitLevel+1])){
+      const [key, value] = split;
+      //console.log("split",split);
+      
+      valuesDatas.set(key.trim(),value.trim());
+      }else{
+        const value = split;
+        const key = value.shift();
+        valuesDatas.set(key,value);
+      }
+      
+  });
+  
+  return valuesDatas;
 }

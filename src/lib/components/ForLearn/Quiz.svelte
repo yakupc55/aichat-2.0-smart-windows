@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { t } from "$lib/lang";
-	import { createMapFromSplitData, splitDataByLevel } from "$lib/utils3";
+	import { createMapFromSplitData, splitDataByLevel } from "$lib/utils";
 
   export let value: string;
 console.log("value",value);
@@ -26,12 +26,8 @@ console.log("value",value);
 
    $: {
    try {
-   // value +="]";
-   /*
-     const titleMatch = value.match(/title=['"]([^'"]+)['"]/);
-    const typeMatch = value.match(/type=['"]([^'"]+)['"]/);
-    const questionsMatch = value.match(/questions\s*=\s*([\s\S]*)/);
-*/  const splitData = splitDataByLevel(value, 0);
+
+    const splitData = splitDataByLevel(value, 0);
     const valuesDatas = createMapFromSplitData(splitData, 1);
     console.log('values data: ', valuesDatas);
     title = valuesDatas.get('title');
@@ -56,23 +52,6 @@ console.log("value",value);
       totalQuestions = questions.length;
     }
 
-    //title = titleMatch?.[1] ?? '';
-    //quizType = (typeMatch?.[1] as QuizType) ?? 'word';
-/*if (questionsMatch?.[1]) {
-      const jsonString = questionsMatch[1]
-        .replace(/(\w+)\s*:/g, '"$1":')
-        .replace(/'/g, '"')
-        .replace(/,\s*}/g, '}')
-        .replace(/,\s*\]/g, ']');
-
-      questions = JSON.parse(`[${jsonString}]`)[0];
-      totalQuestions = questions.length; // Dinamik olarak güncelle
-      console.log(questions);
-      
-    } else {
-      questions = [];
-      totalQuestions = 0;
-    }*/
   } catch (err) {
     console.error("Error parsing value:", err);
     questions = [];
