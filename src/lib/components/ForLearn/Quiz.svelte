@@ -12,7 +12,10 @@ console.log("value",value);
     answer: string | number;
     explanation?: string;
   };
-
+type WordPair = {
+  word: string; // Kelimenin orijinal hali (örneğin, İngilizce)
+  translation: string; // Kelimenin çevirisi (örneğin, Türkçe)
+};
   let title = '';
   let quizType: QuizType = 'word';
   let questions: Question[] = [];
@@ -32,9 +35,26 @@ console.log("value",value);
     console.log('values data: ', valuesDatas);
     title = valuesDatas.get('title');
     quizType = valuesDatas.get('type');
-    const questionsData: string[] = valuesDatas.get('questions');
+  
+    
     if(questions.length<1){
-      questionsData.forEach((data) => {
+      if (quizType === 'word') {
+    const wordPairsData: string[] = valuesDatas.get('wordPairs');
+    console.log("question data",wordPairsData);
+      // Word türü için özel işlem
+      const wordPairs: WordPair[] = []; // Kelime çiftlerini al
+      wordPairsData.forEach((data) => {
+        let splitData = splitDataByLevel(data, 2);
+        const inputData = createMapFromSplitData(splitData, 3);
+        wordPairs.push({
+          word:inputData.get('word'),
+          translation:inputData.get('translation')
+        });
+      });
+      questions = generateWordQuestions(wordPairs); // Soruları oluştur
+    }else{
+        const questionsData: string[] = valuesDatas.get('questions');
+        questionsData.forEach((data) => {
         let splitData = splitDataByLevel(data, 2);
         console.log("split data",splitData);
         
@@ -50,6 +70,8 @@ console.log("value",value);
         });
       });
       totalQuestions = questions.length;
+    }
+
     }
 
   } catch (err) {
@@ -86,6 +108,45 @@ console.log("value",value);
     score = 0;
     showExplanation = false;
   }
+  function generateWordQuestions(wordPairs: WordPair[]): Question[] {
+  const questions: Question[] = [];
+
+  wordPairs.forEach((pair, index) => {
+    // Doğru cevap
+    const correctAnswer = pair.translation;
+
+    // Yanlış cevaplar için rastgele çeviriler seçiyoruz
+    const otherTranslations = wordPairs
+      .filter((_, i) => i !== index) // Mevcut kelimeyi dışarıda bırak
+      .map(p => p.translation); // Diğer kelimelerin çevirilerini al
+
+    // Rastgele 3 yanlış cevap seçiyoruz
+    const wrongAnswers = shuffleArray(otherTranslations).slice(0, 3);
+
+    // Tüm seçenekleri birleştiriyoruz (doğru cevap + yanlış cevaplar)
+    const options = shuffleArray([...wrongAnswers, correctAnswer]);
+
+    // Soruyu oluşturuyoruz
+    questions.push({
+      question: `${pair.word}`, // Soru metni
+      options: options, // Seçenekler
+      answer: correctAnswer, // Doğru cevap
+      explanation: `${pair.word} kelimesinin anlamı ${correctAnswer}dır.` // Açıklama
+    });
+  });
+
+  return questions;
+}
+
+// Rastgele sıralama için yardımcı bir fonksiyon
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
   // Class hesaplamayı ayrı bir fonksiyona alabiliriz
    function getOptionClasses(
     index: number,
