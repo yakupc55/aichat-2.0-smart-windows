@@ -63,7 +63,21 @@ export const translations = {
         restartBuilderText: "Restart Practice",
         ofTextTotal: "of",
         clickToRemoveText: "Click to remove",
-        clickToAddText: "Click to add"
+        clickToAddText: "Click to add",
+        //smart kontroller çevirileri
+        availableClientsText: "Available Apps",
+        noClientsAvailableText: "No Apps are currently active.",
+        selectClientText: "Select a Client",
+        chooseClientText: "Choose a Client...",
+        requestDocumentationText: "Request Documentation",
+        documentationForClientText: "{0} Client Documentation",
+        controlPanelText: "Control Panel",
+        commandCodeText: "Command Code (JSON)",
+        enterJsonCommandText: "Example: { \"action\": \"createFile\", \"filename\": \"test.txt\", \"content\": \"Hello World\" }",
+        applyOperationText: "Apply Operation",
+        contentText: "Content",
+        filesText: "Files",
+        sendingCommandToAppText: "Sending command to app",
 
     },
     tr: {
@@ -128,7 +142,22 @@ export const translations = {
         sentenceBuilderCompleteText: "Alıştırma Tamamlandı! {score}/{totalQuestions} ({percentage}%) cümle doğru.",
         restartBuilderText: "Tekrar Başla",
         clickToRemoveText: "Kaldırmak için tıkla",
-        clickToAddText: "Eklemek için tıkla"
+        clickToAddText: "Eklemek için tıkla",
+
+        //smart kontroller çevirileri
+        availableClientsText: "Mevcut Uygulama'lar",
+        noClientsAvailableText: "Şu anda hiçbir uygulama aktif değil.",
+        selectClientText: "Bir Uygulma Seçin",
+        chooseClientText: "Uygulama Seç...",
+        requestDocumentationText: "Kullanım yapısını içe aktar",
+        documentationForClientText: "{0} Uygulama Dökümantasyonu",
+        controlPanelText: "İşlem Paneli",
+        commandCodeText: "Komut Kodu (JSON)",
+        enterJsonCommandText: "Örn: { \"action\": \"createFile\", \"filename\": \"test.txt\", \"content\": \"Merhaba Dünya\" }",
+        applyOperationText: "İşlemi Uygula",
+        contentText: "İçerik",
+        filesText: "Dosyalar",
+        sendingCommandToAppText: "Komut gönderilecek uygulama",
     }
 };
 

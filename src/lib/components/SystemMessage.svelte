@@ -2,7 +2,9 @@
 	import { t } from '$lib/lang';
 	import Quiz from './ForLearn/Quiz.svelte';
 	import SentenceBuilder from './ForLearn/SentenceBuilder.svelte';
+	import SmartController from './SmartContol/SmartController.svelte';
 	import ChatCalculate from './tools/ChatCalculate.svelte';
+	import HideData from './tools/HideData.svelte';
 
 	export let type: string;
 	export let value: string;
@@ -12,7 +14,9 @@
 	let titleMap: Record<string, string> = {
 		'chat-calculate': t('chatCalculate'),
 		quiz: 'Quiz',
-		'sentence-builder': t('sentenceBuilder')
+		'sentence-builder': t('sentenceBuilder'),
+		'smart-control': 'Smart controller',
+		'hide-data': 'Hide Data'
 	};
 
 	let title = titleMap[type] ?? t('smartWindow');
@@ -53,6 +57,10 @@
 				<Quiz {value} />
 			{:else if type === 'sentence-builder'}
 				<SentenceBuilder {value} />
+			{:else if type === 'smart-control'}
+				<SmartController {value} />
+			{:else if type === 'hide-data'}
+				<HideData {value} />
 			{:else}
 				<div>{t('noSmartWindow')} <strong>{type}</strong></div>
 			{/if}

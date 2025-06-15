@@ -1,8 +1,9 @@
 // src/lib/chatStore.ts
-//import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioService';
 import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioServiceWithAddFeatureApi';
-//import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
+// Eğer ollamaService'i kullanıyorsanız:
+// import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
 import { writable } from 'svelte/store';
+
 export type Message = {
     id: string;
     sender: 'user' | 'assistant';
@@ -17,22 +18,41 @@ function createChatStore() {
     return {
         subscribe,
         isStreaming, // isStreaming'i dışarıya aç
-
+        addDocumationMessage(documentMessage: string){
+        let infoMessage = "🛠️smart-window🧲hide-data🧲title🌟içe aktarılan yapılandırma mesajları🚀"+documentMessage+"🛠️"
+        const newMessage: Message = {
+            id: crypto.randomUUID(),
+            sender: 'assistant',
+            content: infoMessage, // dökümantasyon bilgisi
+            timestamp: new Date(),
+        };
+        update((messages) => [...messages, newMessage]);
+        },
+        // documentation parametresini isteğe bağlı hale getiriyoruz
         async addMessage(userMessage: string) {
+            let fullUserContent = userMessage;
+
+            // Eğer documentation varsa, kullanıcı mesajının altına ekle
+            // Markdown kod bloğu ile formatlıyoruz
+
             const newMessage: Message = {
                 id: crypto.randomUUID(),
                 sender: 'user',
-                content: userMessage,
+                content: fullUserContent, // Güncellenmiş içerik
                 timestamp: new Date(),
             };
-
-            // Kullanıcı mesajını ekleyelim
+           
             update((messages) => [...messages, newMessage]);
+            
+            // Kullanıcı mesajını ekleyelim
+            
 
             // Bot'un yanıtını alalım
-            const conversationHistory = [
-                ...this.getConversationHistory(),
-            ];
+            // Not: LLM'e göndermek istediğiniz history'de documentation olmalı mı karar verin.
+            // Şu anki durumda, fullUserContent ile documentation da history'ye dahil olacak.
+            // Eğer LLM'in sadece saf kullanıcı sorusunu görmesini isterseniz, burada `userMessage`
+            // ile bir "geçmiş" oluşturmanız gerekebilir. Ancak genellikle context olması tercih edilir.
+            const conversationHistory = this.getConversationHistory();
 
             // Bot mesajını oluştur
             const botMessage: Message = {
@@ -52,14 +72,15 @@ function createChatStore() {
                 // Yanıtı akış halinde işle
                 // console.log("Sohbet geçmişi apiye gönderiliyor:");
                 // console.log(JSON.stringify(conversationHistory, null, 2));
-                //for await (const chunk of streamOllamaResponse(conversationHistory)) {
 
+                // Kullandığınız LLM servisine göre birini uncomment edin:
+                // for await (const chunk of streamOllamaResponse(conversationHistory)) {
                 for await (const chunk of streamLMStudioResponse(conversationHistory)) {
                     update((messages) => {
                         const updatedMessages = [...messages];
                         const lastMessage = updatedMessages[updatedMessages.length - 1];
 
-                        if (lastMessage.sender === 'assistant') {
+                        if (lastMessage && lastMessage.sender === 'assistant') { // lastMessage kontrolü eklendi
                             lastMessage.content += chunk; // Bot mesajına parça ekleyelim
                         }
 
@@ -68,6 +89,14 @@ function createChatStore() {
                 }
             } catch (error) {
                 console.error('Streaming error:', error);
+                update((messages) => {
+                    const updatedMessages = [...messages];
+                    const lastMessage = updatedMessages[updatedMessages.length - 1];
+                    if (lastMessage && lastMessage.sender === 'assistant') {
+                        lastMessage.content += `\n\n_Hata: Yanıt alınamadı. Detay: ${error.message || error}_`;
+                    }
+                    return updatedMessages;
+                });
             } finally {
                 // Akış tamamlandı veya durduruldu
                 isStreaming.set(false);
@@ -76,12 +105,14 @@ function createChatStore() {
 
         getConversationHistory() {
             let history: { role: string; content: string }[] = [];
-            this.subscribe((messages) => {
+            // Bu kısım subscribe fonksiyonunu hemen çağırıp aboneliği bırakır.
+            // Anlık değeri almak için kullanılır.
+            subscribe((messages) => {
                 history = messages.map((msg) => ({
                     role: msg.sender,
                     content: msg.content,
                 }));
-            })();
+            })(); // `()` subscribe'ı çağırıp hemen unsubscribe eder.
             return history;
         },
 
@@ -91,7 +122,8 @@ function createChatStore() {
         },
 
         stopStreaming() {
-            //ollamaStreamAbort(); // Akışı durdur
+            // Kullanılan LLM servisine göre birini uncomment edin:
+            // ollamaStreamAbort(); // Akışı durdur
             lmStudioStreamAbort();
             isStreaming.set(false); // Akış durumu false olsun
         },

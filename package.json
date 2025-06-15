@@ -37,6 +37,7 @@
 	},
 	"dependencies": {
 		"ollama": "^0.5.16",
-		"svelte-i18n": "^4.0.1"
+		"svelte-i18n": "^4.0.1",
+		"uuid": "^11.1.0"
 	}
 }

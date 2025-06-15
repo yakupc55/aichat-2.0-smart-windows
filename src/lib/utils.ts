@@ -12,7 +12,7 @@ export function parseSystemMessages(content: string) {
     // console.log("current index",currentIndex);
     // console.log("content",content);
     // console.log("akış durdu.");
-    const datas = content.split(/🛠️(.*?)🛠️/); // Regex'e göre böler
+    const datas = content.split(/🛠️(.*?)🛠️/s); // Regex'e göre böler
     // console.log("datas",datas);
     if(datas.length>1){
         const smartWindowData = datas[1].split("🧲");
