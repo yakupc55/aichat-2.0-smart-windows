@@ -31,7 +31,7 @@ export const translations = {
         ResetChat: 'Reset Chat',
         StartNewChat: 'Since we use Google},\'s free API, your data processed according to Google policies may be used to improve Google models. Therefore, refrain from sharing your sensitive data.',
         noSmartWindow: 'A smart window of this type is not configured: or the process is still in progress',
-         // Quiz çevirileri
+        // Quiz çevirileri
         questionText: "Question",
         wordQuestionText: 'What is the meaning of "{0}"?',
         selectOptionText: "Please select an option",
@@ -44,7 +44,26 @@ export const translations = {
         hideExplanationText: "Hide Explanation",
         explanationText: "Explanation",
         quizCompleteText: "Quiz Completed! Your Score: {score}/{totalQuestions} (%{percentage})",
-        ofText: "of"
+        ofText: "of",
+        hideText: "hide",
+        showText: "show",
+
+        //cümle oluşlturma çevirileri
+        sentenceBuilder: "Sentence Builder",
+        sentenceText: "Sentence",
+        buildEnglishSentenceText: "Build the English equivalent of '{0}':",
+        dragWordsHereText: "Drag or click words here...",
+        checkSentenceText: "Check Sentence",
+        correctSentenceText: "Congratulations! Correct sentence.",
+        wrongSentenceText: "Sorry, incorrect sentence.",
+        showCorrectSentenceText: "Show Correct Sentence",
+        hideCorrectSentenceText: "Hide Correct Sentence",
+        nextSentenceText: "Next Sentence",
+        sentenceBuilderCompleteText: "Practice Complete! {score}/{totalQuestions} ({percentage}%) sentences correct.",
+        restartBuilderText: "Restart Practice",
+        ofTextTotal: "of",
+        clickToRemoveText: "Click to remove",
+        clickToAddText: "Click to add"
 
     },
     tr: {
@@ -90,7 +109,26 @@ export const translations = {
         hideExplanationText: "Açıklamayı Gizle",
         explanationText: "Açıklama",
         quizCompleteText: "Test Tamamlandı! Skorunuz: {score}/{totalQuestions} (%{percentage})",
-        ofText: "/"
+        ofText: "/",
+        hideText: "gizle",
+        showText: "göster",
+
+        //cümle oluşturma çevirileri
+        sentenceBuilder: "Cümle oluşturma",
+        sentenceText: "Cümle",
+        ofTextTotal: "toplam",
+        buildEnglishSentenceText: "{0} cümlesinin İngilizce karşılığını oluşturun:",
+        dragWordsHereText: "Kelime sürükle veya tıkla...",
+        checkSentenceText: "Cümleyi Kontrol Et",
+        correctSentenceText: "Tebrikler! Doğru cümle.",
+        wrongSentenceText: "Maalesef, yanlış cümle.",
+        showCorrectSentenceText: "Doğru Cümleyi Göster",
+        hideCorrectSentenceText: "Doğru Cümleyi Gizle",
+        nextSentenceText: "Sonraki Cümle",
+        sentenceBuilderCompleteText: "Alıştırma Tamamlandı! {score}/{totalQuestions} ({percentage}%) cümle doğru.",
+        restartBuilderText: "Tekrar Başla",
+        clickToRemoveText: "Kaldırmak için tıkla",
+        clickToAddText: "Eklemek için tıkla"
     }
 };
 
