@@ -36,6 +36,7 @@
 		"vite": "^6.2.6"
 	},
 	"dependencies": {
+		"json5": "^2.2.3",
 		"ollama": "^0.5.16",
 		"svelte-i18n": "^4.0.1",
 		"uuid": "^11.1.0"

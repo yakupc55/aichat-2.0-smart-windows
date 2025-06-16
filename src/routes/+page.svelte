@@ -178,6 +178,7 @@
 		font-size: 0.95rem;
 		line-height: 1.4;
 		word-wrap: break-word;
+		white-space: pre-line;
 	}
 
 	.user-bubble {

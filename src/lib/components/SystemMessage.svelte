@@ -5,6 +5,7 @@
 	import SmartController from './SmartContol/SmartController.svelte';
 	import ChatCalculate from './tools/ChatCalculate.svelte';
 	import HideData from './tools/HideData.svelte';
+	import ResultData from './tools/ResultData.svelte';
 
 	export let type: string;
 	export let value: string;
@@ -15,8 +16,9 @@
 		'chat-calculate': t('chatCalculate'),
 		quiz: 'Quiz',
 		'sentence-builder': t('sentenceBuilder'),
-		'smart-control': 'Smart controller',
-		'hide-data': 'Hide Data'
+		'smart-control': 'Akıllı Kontrolcü',
+		'hide-data': '',
+		'result-data':'',
 	};
 
 	let title = titleMap[type] ?? t('smartWindow');
@@ -61,6 +63,8 @@
 				<SmartController {value} />
 			{:else if type === 'hide-data'}
 				<HideData {value} />
+			{:else if type === 'resul-data'}
+				<ResultData {value} />
 			{:else}
 				<div>{t('noSmartWindow')} <strong>{type}</strong></div>
 			{/if}
