@@ -6,7 +6,7 @@ It's time to bring a fresh perspective to AI conversations with AI-Chat 2.0. Wit
 ![AI-Chat 2.0 Screenshot](./en-main.png)
 
 # AI-Chat 2.0 / Smart Windows / Smart Controller
-![AI-Chat 2.0 Screenshot](./en-controller.png)
+![AI-Chat 2.0 Screenshot](./en-contoller.png)
 ## 🤖 AI Model
 
 This project integrates a custom-tuned model hosted on Hugging Face:
