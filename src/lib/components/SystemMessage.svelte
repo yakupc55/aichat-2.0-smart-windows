@@ -16,7 +16,7 @@
 		'chat-calculate': t('chatCalculate'),
 		quiz: 'Quiz',
 		'sentence-builder': t('sentenceBuilder'),
-		'smart-control': 'Akıllı Kontrolcü',
+		'smart-control':  t('smartControlText'),
 		'hide-data': '',
 		'result-data':'',
 	};

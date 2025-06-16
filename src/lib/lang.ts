@@ -1,5 +1,6 @@
 // src/lib/lang.ts
 import { currentLanguage } from './Stores/LangStores';
+let activeLang = "en";
 export const translations = {
     en: {
         AppName: 'AI Chat 2.0',
@@ -65,6 +66,8 @@ export const translations = {
         clickToRemoveText: "Click to remove",
         clickToAddText: "Click to add",
         //smart kontroller çevirileri
+        smartControlText:'Smart Controller',
+        smartControlPanelText:'Smart Control Panel',
         availableClientsText: "Available Apps",
         noClientsAvailableText: "No Apps are currently active.",
         selectClientText: "Select a Client",
@@ -78,7 +81,8 @@ export const translations = {
         contentText: "Content",
         filesText: "Files",
         sendingCommandToAppText: "Sending command to app",
-
+        successOperationMessage: 'The operation was successful',
+        commingDataInfoText:'imported configuration messages'
     },
     tr: {
         AppName: 'YZ Sohbet 2.0',
@@ -145,6 +149,8 @@ export const translations = {
         clickToAddText: "Eklemek için tıkla",
 
         //smart kontroller çevirileri
+        smartControlText:'Akıllı Kontrolcü',
+        smartControlPanelText:'Akıllı Kontrol Paneli',
         availableClientsText: "Mevcut Uygulama'lar",
         noClientsAvailableText: "Şu anda hiçbir uygulama aktif değil.",
         selectClientText: "Bir Uygulma Seçin",
@@ -158,6 +164,8 @@ export const translations = {
         contentText: "İçerik",
         filesText: "Dosyalar",
         sendingCommandToAppText: "Komut gönderilecek uygulama",
+        successOperationMessage: 'İşlem başarıyla sonuçlandırıldı',
+        commingDataInfoText:'içe aktarılan yapılandırma mesajları'
     }
 };
 
@@ -165,6 +173,7 @@ export const translations = {
 export function t(key: string, params?: { [key: string]: string }) {
     let translation = '';
     currentLanguage.subscribe((lang) => {
+        activeLang = lang;
         translation = translations[lang][key] || key;
     });
 
@@ -178,4 +187,8 @@ export function t(key: string, params?: { [key: string]: string }) {
 // Dili değiştirme ve localStorage'a kaydetme
 export function setLanguage(lang: string) {
     currentLanguage.set(lang);
+}
+
+export function getLanguage():string {
+    return activeLang;
 }

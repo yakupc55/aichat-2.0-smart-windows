@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/lang";
+  import { getLanguage, t } from "$lib/lang";
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
@@ -104,8 +104,8 @@
     {#each clients as client (client.id)}
       <span class="client-item" class:active={selectedClientId === client.id}>
         {client.metadata.name || client.id}
-        {#if client.metadata.description}
-          ({client.metadata.description})
+        {#if client.metadata.description[getLanguage()]}
+          ({client.metadata.description[getLanguage()]})
         {/if}
       </span>
     {/each}

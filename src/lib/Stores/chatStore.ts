@@ -1,4 +1,5 @@
 // src/lib/chatStore.ts
+import { t } from '$lib/lang';
 import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioServiceWithAddFeatureApi';
 // Eğer ollamaService'i kullanıyorsanız:
 // import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
@@ -19,7 +20,7 @@ function createChatStore() {
         subscribe,
         isStreaming, // isStreaming'i dışarıya aç
         addDocumationMessage(documentMessage: string){
-        let infoMessage = "🛠️smart-window🧲hide-data🧲title🌟içe aktarılan yapılandırma mesajları🚀"+documentMessage+"🛠️"
+        let infoMessage = "🛠️smart-window🧲hide-data🧲title🌟"+t('commingDataInfoText')+"🚀"+documentMessage+"🛠️"
         const newMessage: Message = {
             id: crypto.randomUUID(),
             sender: 'assistant',

@@ -1,7 +1,7 @@
 <!-- SmartKontrol.svelte -->
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { t } from '$lib/lang';
+  import { t,getLanguage } from '$lib/lang';
   import { createMapFromSplitData, splitDataByLevel } from '$lib/utils';
   import { v4 as uuidv4 } from 'uuid'; // SmartControl için benzersiz ID
     import JSON5 from 'json5';
@@ -9,6 +9,7 @@
   import ClientSelectionPanel from './ClientSelectionPanel.svelte';
   import ControlOperationsPanel from './ControlOperationsPanel.svelte';
   import { chatStore } from '$lib/Stores/chatStore'; // chatStore'u import edin
+  import { currentLanguage } from '$lib/Stores/LangStores';
 
   export let value: string;
 
@@ -39,7 +40,7 @@
     try {
       const splitData = splitDataByLevel(value, 0);
       const valuesDatas = createMapFromSplitData(splitData, 1);
-      title = valuesDatas.get('title') || 'Akıllı Kontrol Paneli';
+      title = valuesDatas.get('title') ||  t('smartControlPanelText');
 
       // value'dan controlType, app ve initialCommandCode'u oku
       const typeValue = valuesDatas.get('type');
@@ -123,7 +124,7 @@
 
           console.log(data.payload.requesterSmartControlId);
           console.log("SMART_CONTROL_ID",SMART_CONTROL_ID);
-            operationFeedback = `İşlem başarıyla sonuçlandırıldı`;
+            operationFeedback =  t('successOperationMessage');
 
             let contentToDisplay;
             if (typeof data.payload.message === 'object' && data.payload.message !== null) {
@@ -164,7 +165,7 @@
   async function handleRequestDocumentation() {
     console.log('SmartKontrol: handleRequestDocumentation called.');
     if (!selectedClientId) {
-      alert('Lütfen bir client seçin.');
+      alert('Lütfen bir uygulama seçin.');
       console.warn('SmartKontrol: Request Documentation called but selectedClientId is null.');
       return;
     }
@@ -177,6 +178,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId: selectedClientId,
+          lang:getLanguage(),
           requesterSmartControlId: SMART_CONTROL_ID
         })
       });
