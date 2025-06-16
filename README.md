@@ -2,7 +2,11 @@
 
 It's time to bring a fresh perspective to AI conversations with AI-Chat 2.0. With its smart window system, this project takes AI-user interaction to the next level. Currently, it is in its initial test phase and actively running with intelligent calculation features.
 
+
 ![AI-Chat 2.0 Screenshot](./en-main.png)
+
+# AI-Chat 2.0 / Smart Windows / Smart Controller
+![AI-Chat 2.0 Screenshot](./en-controller.png)
 ## 🤖 AI Model
 
 This project integrates a custom-tuned model hosted on Hugging Face:
