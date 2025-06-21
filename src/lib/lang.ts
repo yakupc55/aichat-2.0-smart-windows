@@ -66,8 +66,8 @@ export const translations = {
         clickToRemoveText: "Click to remove",
         clickToAddText: "Click to add",
         //smart kontroller çevirileri
-        smartControlText:'Smart Controller',
-        smartControlPanelText:'Smart Control Panel',
+        smartControlText: 'Smart Controller',
+        smartControlPanelText: 'Smart Control Panel',
         availableClientsText: "Available Apps",
         noClientsAvailableText: "No Apps are currently active.",
         selectClientText: "Select a Client",
@@ -82,7 +82,49 @@ export const translations = {
         filesText: "Files",
         sendingCommandToAppText: "Sending command to app",
         successOperationMessage: 'The operation was successful',
-        commingDataInfoText:'imported configuration messages'
+        commingDataInfoText: 'imported configuration messages',
+
+        //smart toget çevirileri
+        smartTogetherTitle: "Smart Together - AI Together",
+        smartTogetherSubtitle: "Multiplayer P2P Gaming Platform",
+        yourIpAddress: "Your IP Address",
+        connectingToServer: "Connecting to server",
+        currentRoom: "Current Room",
+        connectedPeers: "Connected Peers",
+        createRoom: "Create Room",
+        optionalRoomId: "Optional Room ID",
+        create: "Create",
+        joinRoom: "Join Room",
+        enterRoomId: "Please enter a Room ID",
+        join: "Join",
+        connectToServerToCreate: "You must be connected to the server to create a room.",
+        connectToServerToJoin: "You must be connected to the server to join a room.",
+        multiplayer: "Multiplayer",
+        yourRole: "Your Role",
+        manager: "Manager",
+        participant: "Participant",
+        viewer: "Viewer",
+        becomeParticipant: "Become Participant",
+        becomeViewer: "Become Viewer",
+        playersInRoom: "Players in Room",
+        submitAnswerText: "Submit Answer",
+        finalScores: "Final Scores",
+        yourPeerId: "Your Peer ID",
+        roomIdMustBe6Digits: "Room ID must be 6 digits.",
+        becomeManager: "Become Manager",
+        startGame: "Start Game",
+        noQuestionsLoaded: "No questions loaded. Please ask AI to generate quiz data.",
+        waitingForManagerToStart: "Waiting for manager to start the game...",
+        noGameSelected: "No game selected",
+        selectGameType: "Select Game Type",
+        optionalPassword: "Optional password",
+        enterPasswordIfRequired: "Password (if required)",
+        managerStatus: "Status: {status}",
+        playing: "Playing",
+        notPlaying: "Not Playing",
+        startPlayingAsManager: "Start Playing as Manager",
+        stopPlaying: "Stop Playing",
+        autoNextQuestion: "Auto Next Question",
     },
     tr: {
         AppName: 'YZ Sohbet 2.0',
@@ -149,8 +191,8 @@ export const translations = {
         clickToAddText: "Eklemek için tıkla",
 
         //smart kontroller çevirileri
-        smartControlText:'Akıllı Kontrolcü',
-        smartControlPanelText:'Akıllı Kontrol Paneli',
+        smartControlText: 'Akıllı Kontrolcü',
+        smartControlPanelText: 'Akıllı Kontrol Paneli',
         availableClientsText: "Mevcut Uygulama'lar",
         noClientsAvailableText: "Şu anda hiçbir uygulama aktif değil.",
         selectClientText: "Bir Uygulma Seçin",
@@ -165,7 +207,49 @@ export const translations = {
         filesText: "Dosyalar",
         sendingCommandToAppText: "Komut gönderilecek uygulama",
         successOperationMessage: 'İşlem başarıyla sonuçlandırıldı',
-        commingDataInfoText:'içe aktarılan yapılandırma mesajları'
+        commingDataInfoText: 'içe aktarılan yapılandırma mesajları',
+
+        //smart together çevirileri
+        smartTogetherTitle: "Smart Together - Akıllı Birlikte",
+        smartTogetherSubtitle: "Çok Oyunculu P2P Oyun Platformu",
+        yourIpAddress: "IP Adresiniz",
+        connectingToServer: "Sunucuya bağlanılıyor",
+        currentRoom: "Mevcut Oda",
+        connectedPeers: "Bağlı Oyuncular",
+        createRoom: "Oda Oluştur",
+        optionalRoomId: "İsteğe Bağlı Oda ID",
+        create: "Oluştur",
+        joinRoom: "Odaya Katıl",
+        enterRoomId: "Lütfen bir Oda ID girin",
+        join: "Katıl",
+        connectToServerToCreate: "Oda oluşturmak için sunucuya bağlı olmalısınız.",
+        connectToServerToJoin: "Odaya katılmak için sunucuya bağlı olmalısınız.",
+        multiplayer: "Çok Oyunculu",
+        yourRole: "Rolünüz",
+        manager: "Yönetici",
+        participant: "Katılımcı",
+        viewer: "İzleyici",
+        becomeParticipant: "Katılımcı Ol",
+        becomeViewer: "İzleyici Ol",
+        playersInRoom: "Odaki Oyuncular",
+        submitAnswerText: "Cevabı Gönder",
+        finalScores: "Son Skorlar",
+        yourPeerId: "Peer ID'niz",
+        roomIdMustBe6Digits: "Oda kodu 6 haneli olmalıdır.",
+        becomeManager: "Yönetici Ol",
+        startGame: "Oyunu Başlat",
+        noQuestionsLoaded: "Yüklenecek soru bulunamadı. Lütfen AI'dan quiz verisi üretmesini isteyin.",
+        waitingForManagerToStart: "Yöneticinin oyunu başlatması bekleniyor...",
+        noGameSelected: "Oyun seçilmedi",
+        selectGameType: "Oyun Türü Seç",
+        optionalPassword: "İsteğe bağlı şifre",
+        enterPasswordIfRequired: "Şifre (gerekliyse)",
+        managerStatus: "Durum: {status}", // "Durum: Oynuyor" veya "Durum: Oynamıyor"
+        playing: "Oynuyor",
+        notPlaying: "Oynamıyor",
+        startPlayingAsManager: "Yönetici Olarak Oynamaya Başla",
+        stopPlaying: "Oynamayı Bırak",
+         autoNextQuestion: "Otomatik Sonraki Soru",
     }
 };
 
@@ -189,6 +273,6 @@ export function setLanguage(lang: string) {
     currentLanguage.set(lang);
 }
 
-export function getLanguage():string {
+export function getLanguage(): string {
     return activeLang;
 }

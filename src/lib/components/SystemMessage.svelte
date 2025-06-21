@@ -1,16 +1,19 @@
+<!-- SystemMessage.svelte -->
 <script lang="ts">
 	import { t } from '$lib/lang';
 	import Quiz from './ForLearn/Quiz.svelte';
 	import SentenceBuilder from './ForLearn/SentenceBuilder.svelte';
 	import SmartController from './SmartContol/SmartController.svelte';
+	import SmartTogether from './together/SmartTogether.svelte';
 	import ChatCalculate from './tools/ChatCalculate.svelte';
 	import HideData from './tools/HideData.svelte';
 	import ResultData from './tools/ResultData.svelte';
 
+
 	export let type: string;
-	export let value: string;
+	export let value: string; 
 	export let allText: string;
-	console.log('type', type);
+	console.log('SystemMessage type:', type);
 
 	let titleMap: Record<string, string> = {
 		'chat-calculate': t('chatCalculate'),
@@ -19,6 +22,7 @@
 		'smart-control':  t('smartControlText'),
 		'hide-data': '',
 		'result-data':'',
+        'smart-together': t('smartTogetherTitle'), 
 	};
 
 	let title = titleMap[type] ?? t('smartWindow');
@@ -63,8 +67,10 @@
 				<SmartController {value} />
 			{:else if type === 'hide-data'}
 				<HideData {value} />
-			{:else if type === 'resul-data'}
+			{:else if type === 'result-data'}
 				<ResultData {value} />
+            {:else if type === 'smart-together'} 
+				<SmartTogether {value} /> 
 			{:else}
 				<div>{t('noSmartWindow')} <strong>{type}</strong></div>
 			{/if}
@@ -73,6 +79,7 @@
 </div>
 
 <style>
+	/* Stiller aynı kalacak */
 	.window-container {
 		margin: 0.25rem 0;
 		border: 1px solid #d1d5db;
