@@ -377,33 +377,35 @@
 		}
 	}
 
-	function managerNextQuestion() {
-		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
+	
+  function managerNextQuestion() {
+    if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
 
-		currentQuestionIndex++;
-		if (currentQuestionIndex < totalQuestions) {
-			players.update((map) => {
-				map.forEach((player) => {
-					player.hasAnswered = false;
-					player.lastAnswer = null;
-				});
-				return map;
-			});
-			resetForNextQuestion();
-			dispatch('sendData', { data: { type: 'nextQuestion', questionIndex: currentQuestionIndex } });
-		} else {
-			dispatch('sendData', {
-				data: {
-					type: 'endGame',
-					finalScores: Array.from(get(players).values()).map((p) => ({
-						peerId: p.peerId,
-						userName: p.userName,
-						score: p.score
-					})) // userName ekle
-				}
-			});
-		}
-	}
+    currentQuestionIndex++; // Soru indeksini artır
+    console.log("currentQuestionIndex",currentQuestionIndex);
+    
+    if (currentQuestionIndex <= totalQuestions) {
+      // Hala sorular varsa, yeni soruya geçiş işlemleri
+      players.update((map) => {
+          map.forEach((player) => {
+              player.hasAnswered = false;
+              player.lastAnswer = null;
+          });
+          return map;
+      });
+      resetForNextQuestion();
+      dispatch('sendData', { data: { type: 'nextQuestion', questionIndex: currentQuestionIndex } });
+    } else {
+      // Quiz tamamlandı
+      console.log('Quiz tamamlandı! Final skorları gönderiliyor.');
+      dispatch('sendData', {
+        data: {
+          type: 'endGame',
+          finalScores: Array.from(get(players).values()).map((p) => ({ peerId: p.peerId, userName: p.userName, score: p.score })),
+        }
+      });
+    }
+  }
 
 	function submitAnswer() {
 		// Sadece katılımcı veya oynayan-yönetici cevap verebilir
@@ -838,17 +840,17 @@
 
 					{#if selfRole === 'manager' || selfRole === 'manager-player'}
 						<button
-							class="button next-button"
-							on:click={managerNextQuestion}
-							disabled={totalQuestions === 0 || currentQuestionIndex === totalQuestions - 1}
-						>
-							{t('nextQuestionText')}
-						</button>
-						{#if questions[currentQuestionIndex] && questions[currentQuestionIndex].explanation}
-							{#if selfRole !== 'participant'}
-								<button class="button" on:click={() => (showExplanation = !showExplanation)}>
-									{showExplanation ? t('hideExplanationText') : t('showExplanationText')}
-								</button>
+                        class="button next-button"
+                        on:click={managerNextQuestion}
+                        disabled={totalQuestions === 0 || currentQuestionIndex > totalQuestions - 1} 
+                    >
+                        {t('nextQuestionText')}
+                    </button>
+                    {#if questions[currentQuestionIndex] && questions[currentQuestionIndex].explanation}
+                        {#if selfRole !== 'participant'}
+                            <button class="button" on:click={() => (showExplanation = !showExplanation)}>
+                                {showExplanation ? t('hideExplanationText') : t('showExplanationText')}
+                            </button>
 							{/if}
 						{/if}
 					{/if}

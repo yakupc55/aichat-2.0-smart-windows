@@ -41,27 +41,23 @@
     window.removeEventListener('p2pRoomStatus', handleRoomStatusChange);
   });
 
-  function handleGlobalP2PMessage(event: Event) {
+function handleGlobalP2PMessage(event: Event) {
     const customEvent = event as CustomEvent;
     const message = customEvent.detail.message;
     const senderPeerId = customEvent.detail.senderPeerId;
 
     if (message.type === 'startGame' && $selfRole !== 'manager') {
-      // Katılımcı/İzleyici: Yönetici oyunu başlattığında
-      isGameInitialized = true; // Oyun başlatıldı olarak işaretle
-      // Oyun içeriği (value) ve türü gameStatus mesajıyla gelecek
+      isGameInitialized = true;
     } else if (message.type === 'endGame') { // Yönetici veya kendisi oyunu bitirdiğinde
       isGameInitialized = false; // Oyunun bittiğini işaretle
+      // Quiz bittiğinde otomatik olarak lobie dön:
+      view = 'lobby'; // YENİ EKLENDİ / DÜZELTİLDİ
+      console.log('Oyun sona erdi, lobie dönülüyor.');
     } else if (message.type === 'gameStatus' && $selfRole !== 'manager') {
-        // Katılımcı: Yöneticiden gelen gameStatus'ten oyun türünü al
-        // Not: questions kontrolü yerine message.gameId veya benzeri bir field gelmeli.
-        // Şimdilik questions varsa quiz kabul edelim ama bu geçici.
-        const gameId = (message.questions && message.questions.length > 0) ? gameTypes[0].id : 'quiz'; // varsayılan olarak quiz
-        selectedGameType = getGameTypeById(gameId);
-        // isGameInitialized buradan da güncellenecek
-        isGameInitialized = message.gameStarted;
+        // ...
     } else if (message.type === 'resetQuiz' && $selfRole !== 'manager') {
-        isGameInitialized = false; // Resetlendiğinde oyun başlamamış gibi davran
+        isGameInitialized = false;
+        view = 'lobby'; // Resetlendiğinde de lobie dön
     }
   }
 
