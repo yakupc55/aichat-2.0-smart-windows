@@ -38,9 +38,15 @@
         sentencesData.forEach((data) => {
           let splitData = splitDataByLevel(data, 2);
           const inputData = createMapFromSplitData(splitData, 3);
+         
+          let langList:string[] = [];
+          inputData.forEach((element,key) => {
+            langList.push(key);
+          });
+          
           sentencePairs.push({
-            turkish: inputData.get('turkish'),
-            english: inputData.get('english')
+            turkish: inputData.get(langList[0]),
+            english: inputData.get(langList[1])
           });
         });
         totalSentences = sentencePairs.length;

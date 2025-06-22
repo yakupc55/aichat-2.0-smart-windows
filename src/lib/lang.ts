@@ -52,7 +52,7 @@ export const translations = {
         //cümle oluşlturma çevirileri
         sentenceBuilder: "Sentence Builder",
         sentenceText: "Sentence",
-        buildEnglishSentenceText: "Build the English equivalent of '{0}':",
+        buildEnglishSentenceText: "Build the equivalent of '{0}':",
         dragWordsHereText: "Drag or click words here...",
         checkSentenceText: "Check Sentence",
         correctSentenceText: "Congratulations! Correct sentence.",
@@ -184,7 +184,7 @@ export const translations = {
         sentenceBuilder: "Cümle oluşturma",
         sentenceText: "Cümle",
         ofTextTotal: "toplam",
-        buildEnglishSentenceText: "{0} cümlesinin İngilizce karşılığını oluşturun:",
+        buildEnglishSentenceText: "{0} cümlesinin karşılığını oluşturun:",
         dragWordsHereText: "Kelime sürükle veya tıkla...",
         checkSentenceText: "Cümleyi Kontrol Et",
         correctSentenceText: "Tebrikler! Doğru cümle.",
