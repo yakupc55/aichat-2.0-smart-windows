@@ -133,9 +133,9 @@ function handleGlobalP2PMessage(event: Event) {
 
 <style>
   .container {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 1.5rem;
+    /* max-width: 900px; */
+    margin: 0.25rem auto;
+    padding: 0.25rem;
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -143,20 +143,20 @@ function handleGlobalP2PMessage(event: Event) {
   }
   .header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
   }
   .header h1 {
     color: #1a237e;
-    font-size: 2.5rem;
+    font-size: 0.5rem;
     margin-bottom: 0.5rem;
   }
   .header p {
     color: #424242;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
   .status-info {
-    margin-bottom: 1.5rem;
-    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    padding: 0.4rem;
     background-color: #e3f2fd;
     border-radius: 8px;
     color: #1976d2;
@@ -168,8 +168,8 @@ function handleGlobalP2PMessage(event: Event) {
     color: #0d47a1;
   }
   .debug-info {
-    margin-top: 2rem;
-    padding: 1rem;
+    margin-top: 0.5rem;
+    padding: 0.25rem;
     background-color: #f5f5f5;
     border-radius: 8px;
     font-family: monospace;
@@ -179,9 +179,9 @@ function handleGlobalP2PMessage(event: Event) {
   .username-input-group {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 1.5rem;
-    padding: 0.8rem;
+    gap: 4px;
+    margin-bottom: 0.5rem;
+    padding: 0.2rem;
     background-color: #f0f4f8;
     border-radius: 8px;
     border: 1px solid #cce7ff;
@@ -198,7 +198,7 @@ function handleGlobalP2PMessage(event: Event) {
     font-size: 1rem;
   }
   .username-input-group button {
-    padding: 0.6rem 1rem;
+    padding: 0.5rem 0.5rem;
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -214,7 +214,7 @@ function handleGlobalP2PMessage(event: Event) {
 
 <div class="container">
   <header class="header">
-    <h1>{t('smartTogetherTitle')}</h1>
+    <!-- <h1>{t('smartTogetherTitle')}</h1> -->
     <p>{t('smartTogetherSubtitle')}</p>
   </header>
 

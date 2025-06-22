@@ -34,32 +34,32 @@ export let isConnected: boolean;
 
 <style>
   .lobby-section {
-    padding: 1.5rem;
+    padding: 0.25rem;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.25rem;
     background-color: #fafafa;
   }
   .lobby-section h3 {
     margin-top: 0;
     color: #3f51b5;
     font-size: 1.3rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.25rem;
   }
   .input-group {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.2rem;
+    margin-bottom: 0.5rem;
   }
   .input-group input {
     flex-grow: 1;
-    padding: 0.7rem;
+    padding: 0.4rem;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
   }
   .button {
-    padding: 0.7rem 1.2rem;
+    padding: 0.5rem 0.5rem;
     border-radius: 5px;
     border: none;
     cursor: pointer;
@@ -89,7 +89,7 @@ export let isConnected: boolean;
   }
   .select-game-type label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     font-weight: 500;
     color: #555;
   }
@@ -107,14 +107,14 @@ export let isConnected: boolean;
   <div class="lobby-section">
     <h3>{t('createRoom')}</h3>
     
-    <div class="select-game-type">
+    <!-- <div class="select-game-type">
       <label for="game-type">{t('selectGameType')}:</label>
       <select id="game-type" bind:value={selectedGameId}>
         {#each gameTypes as game}
           <option value={game.id}>{game.name}</option>
         {/each}
       </select>
-    </div>
+    </div> -->
 
     <div class="input-group">
       <input type="text" bind:value={newRoomId} placeholder={t('optionalRoomId')} maxlength="6" />

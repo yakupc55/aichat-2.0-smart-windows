@@ -85,8 +85,8 @@ export const translations = {
         commingDataInfoText: 'imported configuration messages',
 
         //smart toget çevirileri
-        smartTogetherTitle: "Smart Together - AI Together",
-        smartTogetherSubtitle: "Multiplayer P2P Gaming Platform",
+        smartTogetherTitle: "Smart Together",
+        smartTogetherSubtitle: "Multi-User Activity Area",
         yourIpAddress: "Your IP Address",
         connectingToServer: "Connecting to server",
         currentRoom: "Current Room",
@@ -217,8 +217,8 @@ export const translations = {
         commingDataInfoText: 'içe aktarılan yapılandırma mesajları',
 
         //smart together çevirileri
-        smartTogetherTitle: "Smart Together - Akıllı Birlikte",
-        smartTogetherSubtitle: "Çok Oyunculu P2P Oyun Platformu",
+        smartTogetherTitle: "Birlikte Aktivite",
+        smartTogetherSubtitle: "Çok Kullanıcılı Aktivite Alanı",
         yourIpAddress: "IP Adresiniz",
         connectingToServer: "Sunucuya bağlanılıyor",
         currentRoom: "Mevcut Oda",

@@ -1,4 +1,4 @@
-<!-- Lobby.svelte -->
+<!-- TogetherQuiz.svelte -->
 <script lang="ts">
 	import { t } from '$lib/lang';
 	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
@@ -111,7 +111,7 @@
 						question: inputData.get('question') || '',
 						explanation: inputData.get('explanation') || '',
 						options: inputData.get('options') || [],
-						answer: inputData.get('answer')
+						answer: parseInt(inputData.get('answer'))
 					});
 				});
 			} else {
@@ -214,6 +214,16 @@
 				break;
 			case 'answerSubmitted':
 				if (selfRole === 'manager' || selfRole === 'manager-player') {
+					const currentQuestion = questions[currentQuestionIndex];
+                    console.log("questions",questions);
+                    
+					// !!! BURADA KONTROL EKLE !!!
+					if (!currentQuestion || !currentQuestion.options) {
+						/*console.error(
+							`Hata: Soru bilgisi eksik! currentQuestionIndex: ${currentQuestionIndex}, questions.length: ${questions.length}`
+						);*/
+						return; // Hata durumunda işlemi durdur
+					}
 					players.update((map) => {
 						const player = map.get(senderPeerId);
 						if (player) {
@@ -335,6 +345,11 @@
 	function sendGameStatusTo(targetPeerId: string | 'all') {
 		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
 
+		if (questions.length === 0 && (selfRole === 'manager' || selfRole === 'manager-player')) {
+			console.warn('Yönetici olarak quiz soruları henüz yüklenmemiş. Gönderilemiyor.');
+			return;
+		}
+
 		const message = {
 			type: 'gameStatus',
 			currentQuestionIndex: currentQuestionIndex,
@@ -342,10 +357,10 @@
 			gameStarted: isGameInitialized,
 			quizTitle: title,
 			quizType: quizType,
-			questions: questions,
+			questions: questions, // Buradaki questions'ın dolu olduğundan emin olun
 			totalQuestions: totalQuestions,
 			autoNextQuestion: autoNextQuestion,
-			playerStates: Array.from(get(players).values()) // PlayerStates zaten userName içeriyor
+			playerStates: Array.from(get(players).values())
 		};
 
 		if (targetPeerId === 'all') {
@@ -377,35 +392,38 @@
 		}
 	}
 
-	
-  function managerNextQuestion() {
-    if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
+	function managerNextQuestion() {
+		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
 
-    currentQuestionIndex++; // Soru indeksini artır
-    console.log("currentQuestionIndex",currentQuestionIndex);
-    
-    if (currentQuestionIndex <= totalQuestions) {
-      // Hala sorular varsa, yeni soruya geçiş işlemleri
-      players.update((map) => {
-          map.forEach((player) => {
-              player.hasAnswered = false;
-              player.lastAnswer = null;
-          });
-          return map;
-      });
-      resetForNextQuestion();
-      dispatch('sendData', { data: { type: 'nextQuestion', questionIndex: currentQuestionIndex } });
-    } else {
-      // Quiz tamamlandı
-      console.log('Quiz tamamlandı! Final skorları gönderiliyor.');
-      dispatch('sendData', {
-        data: {
-          type: 'endGame',
-          finalScores: Array.from(get(players).values()).map((p) => ({ peerId: p.peerId, userName: p.userName, score: p.score })),
-        }
-      });
-    }
-  }
+		currentQuestionIndex++; // Soru indeksini artır
+		console.log('currentQuestionIndex', currentQuestionIndex);
+
+		if (currentQuestionIndex <= totalQuestions) {
+			// Hala sorular varsa, yeni soruya geçiş işlemleri
+			players.update((map) => {
+				map.forEach((player) => {
+					player.hasAnswered = false;
+					player.lastAnswer = null;
+				});
+				return map;
+			});
+			resetForNextQuestion();
+			dispatch('sendData', { data: { type: 'nextQuestion', questionIndex: currentQuestionIndex } });
+		} else {
+			// Quiz tamamlandı
+			console.log('Quiz tamamlandı! Final skorları gönderiliyor.');
+			dispatch('sendData', {
+				data: {
+					type: 'endGame',
+					finalScores: Array.from(get(players).values()).map((p) => ({
+						peerId: p.peerId,
+						userName: p.userName,
+						score: p.score
+					}))
+				}
+			});
+		}
+	}
 
 	function submitAnswer() {
 		// Sadece katılımcı veya oynayan-yönetici cevap verebilir
@@ -436,14 +454,14 @@
 		});
 
 		// Cevabı yöneticiye P2P üzerinden gönder.
-		if (selfRole === 'participant'  && managerPeerId) {
+		if (selfRole === 'participant' && managerPeerId) {
 			const channel = dataChannels.get(managerPeerId);
 			if (channel && channel.readyState === 'open') {
 				channel.send(JSON.stringify({ type: 'answerSubmitted', answerIndex: selectedAnswer }));
 			}
-		}else if (selfRole === 'manager-player') {
-            sendScoreStatusTo('all');
-        }
+		} else if (selfRole === 'manager-player') {
+			sendScoreStatusTo('all');
+		}
 	}
 
 	function resetForNextQuestion() {
@@ -686,11 +704,16 @@
 
 	function startGameAsManager() {
 		if ((selfRole === 'manager' || selfRole === 'manager-player') && !isGameInitialized) {
+			// Oyun başlamadan önce soruların yüklendiğinden emin ol
+			if (questions.length === 0) {
+				console.warn('Quiz başlatılamadı: Yönetici olarak quiz soruları henüz yüklenmemiş.');
+				// Kullanıcıya bir bildirim gösterebilirsiniz.
+				return;
+			}
 			dispatch('sendData', { data: { type: 'startGame' } });
 			sendGameStatusTo('all');
 		}
 	}
-
 	function sendAutoNextState() {
 		if (selfRole === 'manager' || selfRole === 'manager-player') {
 			dispatch('sendData', {
@@ -731,10 +754,10 @@
 		{/if}
 		{#if selfRole === 'manager' || selfRole === 'manager-player'}
 			<div class="manager-controls">
-				<label class="auto-next-label">
+				<!-- <label class="auto-next-label">
 					<input type="checkbox" bind:checked={autoNextQuestion} on:change={sendAutoNextState} />
 					{t('autoNextQuestion')}
-				</label>
+				</label> -->
 			</div>
 		{/if}
 	</div>
@@ -840,17 +863,17 @@
 
 					{#if selfRole === 'manager' || selfRole === 'manager-player'}
 						<button
-                        class="button next-button"
-                        on:click={managerNextQuestion}
-                        disabled={totalQuestions === 0 || currentQuestionIndex > totalQuestions - 1} 
-                    >
-                        {t('nextQuestionText')}
-                    </button>
-                    {#if questions[currentQuestionIndex] && questions[currentQuestionIndex].explanation}
-                        {#if selfRole !== 'participant'}
-                            <button class="button" on:click={() => (showExplanation = !showExplanation)}>
-                                {showExplanation ? t('hideExplanationText') : t('showExplanationText')}
-                            </button>
+							class="button next-button"
+							on:click={managerNextQuestion}
+							disabled={totalQuestions === 0 || currentQuestionIndex > totalQuestions - 1}
+						>
+							{t('nextQuestionText')}
+						</button>
+						{#if questions[currentQuestionIndex] && questions[currentQuestionIndex].explanation}
+							{#if selfRole !== 'participant'}
+								<button class="button" on:click={() => (showExplanation = !showExplanation)}>
+									{showExplanation ? t('hideExplanationText') : t('showExplanationText')}
+								</button>
 							{/if}
 						{/if}
 					{/if}
@@ -897,28 +920,28 @@
 	.quiz-container {
 		max-width: 800px;
 		margin: 0 auto;
-		padding: 1rem;
+		padding: 0.5rem;
 		background-color: #fcfcfc;
 		border-radius: 10px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 	}
 	.quiz-title {
-		font-size: 2rem;
+		font-size: 1.3rem;
 		font-weight: bold;
-		margin-bottom: 1.5rem;
+		margin-bottom: 0.25rem;
 		color: #1e40af;
 		text-align: center;
 	}
 	.role-selection {
 		text-align: center;
-		margin-bottom: 1.5rem;
-		padding: 1rem;
+		margin-bottom: 0.25rem;
+		padding: 0.25rem;
 		background-color: #e8f5e9;
 		border-radius: 8px;
 	}
 	.role-selection button {
-		margin: 0.5rem;
-		padding: 0.8rem 1.5rem;
+		margin: 0.25rem;
+		padding: 0.25rem 0.25rem;
 		border: none;
 		border-radius: 6px;
 		cursor: pointer;
@@ -955,19 +978,19 @@
 	}
 
 	.manager-controls {
-		margin-top: 1rem;
-		padding-top: 1rem;
+		margin-top: 0.25rem;
+		padding-top: 0.25rem;
 		border-top: 1px solid #ddd;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.25rem;
 	}
 	.auto-next-label {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.25rem;
 		font-weight: 500;
 		color: #444;
 	}
@@ -980,11 +1003,11 @@
 	.current-role {
 		font-weight: bold;
 		color: #333;
-		margin-bottom: 0.8rem;
+		margin-bottom: 0.25rem;
 	}
 	.player-list {
-		margin-top: 1.5rem;
-		margin-bottom: 2rem;
+		margin-top: 0.25rem;
+		margin-bottom: 0.25rem;
 		padding: 1rem;
 		background-color: #eceff1;
 		border-radius: 8px;
@@ -1000,11 +1023,11 @@
 		margin: 0;
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: 0.5rem;
+		gap: 0.25rem;
 	}
 	.player-list li {
 		background-color: #ffffff;
-		padding: 0.6rem 1rem;
+		padding: 0.5rem 0.5rem;
 		border-radius: 5px;
 		display: flex;
 		justify-content: space-between;
@@ -1017,30 +1040,30 @@
 	}
 
 	.question-section {
-		margin-top: 2rem;
-		padding: 1.5rem;
+		margin-top: 0.25rem;
+		padding: 0.25rem;
 		border: 1px solid #d1d5db;
 		border-radius: 10px;
 		background-color: white;
 	}
 	.progress {
-		margin-bottom: 1rem;
+		margin-bottom: 0.25rem;
 		font-size: 0.9rem;
 		color: #64748b;
 	}
 	.question {
 		font-size: 1.3rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 0.25rem;
 		font-weight: 500;
 		color: #333;
 	}
 	.options {
 		display: grid;
-		gap: 0.8rem;
-		margin-bottom: 1.5rem;
+		gap: 0.25rem;
+		margin-bottom: 0.25rem;
 	}
 	.option {
-		padding: 0.8rem;
+		padding: 0.5rem;
 		border: 1px solid #d1d5db;
 		border-radius: 8px;
 		cursor: pointer;
@@ -1069,11 +1092,11 @@
 	.button-group {
 		display: flex;
 		gap: 0.5rem;
-		margin-top: 1.5rem;
+		margin-top: 0.5rem;
 		justify-content: center;
 	}
 	.button {
-		padding: 0.8rem 1.5rem;
+		padding: 0.5rem 0.5rem;
 		border-radius: 6px;
 		font-weight: 500;
 		cursor: pointer;
@@ -1112,8 +1135,8 @@
 		background-color: #16a34a;
 	}
 	.feedback {
-		margin-top: 1rem;
-		padding: 1rem;
+		margin-top: 0.5rem;
+		padding: 0.5rem;
 		border-radius: 8px;
 		font-weight: 500;
 	}
@@ -1134,14 +1157,14 @@
 	}
 	.score-final {
 		font-weight: bold;
-		margin-top: 1rem;
-		font-size: 1.5rem;
+		margin-top: 0.5rem;
+		font-size: 1.0rem;
 		text-align: center;
 		color: #1a237e;
 	}
 	.waiting-message {
 		text-align: center;
-		padding: 2rem;
+		padding: 0.5rem;
 		font-size: 1.2rem;
 		color: #666;
 	}
