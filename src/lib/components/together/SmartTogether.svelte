@@ -274,11 +274,11 @@ function handleGlobalP2PMessage(event: Event) {
     {/if}
   {/if}
 
-  <div class="debug-info">
+  <!-- <div class="debug-info">
     <strong>Gelen P2P Mesajları:</strong>
     {#each $receivedMessages as msg}
       <div>{msg}</div>
     {/each}
     <button on:click={sendTestMessage}>Test Mesajı Gönder</button>
-  </div>
+  </div> -->
 </div>
