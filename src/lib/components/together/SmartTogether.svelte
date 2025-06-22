@@ -1,12 +1,15 @@
 <!-- SmartTogether.svelte -->
 <script lang="ts">
   import { t } from "$lib/lang";
-  import { connectSignalingServer, createRoom, joinRoom, selfPeerId, selfRole, currentRoomId, connectedPeers, dataChannels, receivedMessages, sendDataToAllPeers, disconnectP2P } from '$lib/p2p';
+  // selfPeerId, selfRole, connectedPeers, dataChannels, receivedMessages, currentRoomId güncellemelerle birlikte import edildi
+  // selfUserName ve peerUserNames da eklendi
+  import { connectSignalingServer, createRoom, joinRoom, selfPeerId, selfRole, currentRoomId, connectedPeers, dataChannels, receivedMessages, sendDataToAllPeers, disconnectP2P, selfUserName, peerUserNames, setUserName } from '$lib/p2p';
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import Lobby from './Lobby.svelte';
-  import { gameTypes, getGameTypeById, type GameType } from './gameTypes'; // Yeni eklenen
-  
- export let value: string; // Yönetici için AI'dan gelen oyun içeriği
+  import { gameTypes, getGameTypeById, type GameType } from './gameTypes';
+	import { get } from "svelte/store";
+ 
+  export let value: string; // Yönetici için AI'dan gelen oyun içeriği
   
   const SIGNALING_SERVER_URL = 'ws://localhost:3005'; // Port numarasını kontrol edin!
 
@@ -14,11 +17,21 @@
   let selectedGameType: GameType | undefined = gameTypes[0]; // Varsayılan olarak ilk oyunu seç
   let isGameInitialized: boolean = false; // Oyunun başlatılıp başlatılmadığını takip eden yeni state
 
+  // Kullanıcı adı için lokal state
+  let localUserName: string = get(selfUserName); // p2p store'undan başlangıç değerini al
+
   onMount(() => {
     connectSignalingServer(SIGNALING_SERVER_URL);
     window.addEventListener('p2pMessage', handleGlobalP2PMessage);
     window.addEventListener('p2pPlayerLeft', handlePlayerLeft);
     window.addEventListener('p2pRoomStatus', handleRoomStatusChange);
+
+    // Kendi ismimizi p2p store'una bağla
+    selfUserName.subscribe(name => {
+        if (localUserName !== name) { // Çift güncellemeden kaçın
+            localUserName = name;
+        }
+    });
   });
 
   onDestroy(() => {
@@ -41,6 +54,8 @@
       isGameInitialized = false; // Oyunun bittiğini işaretle
     } else if (message.type === 'gameStatus' && $selfRole !== 'manager') {
         // Katılımcı: Yöneticiden gelen gameStatus'ten oyun türünü al
+        // Not: questions kontrolü yerine message.gameId veya benzeri bir field gelmeli.
+        // Şimdilik questions varsa quiz kabul edelim ama bu geçici.
         const gameId = (message.questions && message.questions.length > 0) ? gameTypes[0].id : 'quiz'; // varsayılan olarak quiz
         selectedGameType = getGameTypeById(gameId);
         // isGameInitialized buradan da güncellenecek
@@ -99,7 +114,7 @@
 
   // Debug için
   function sendTestMessage() {
-    sendDataToAllPeers({ type: 'chat', message: `Merhaba, benim ID'im: ${$selfPeerId}` });
+    sendDataToAllPeers({ type: 'chat', message: `Merhaba, benim ID'im: ${$selfPeerId}, adım: ${$selfUserName}` });
   }
 
   $: isConnected = $selfPeerId !== null;
@@ -112,6 +127,11 @@
     } else if (!inRoom && view === 'game') {
         view = 'lobby'; // Odadan çıkılırsa lobie dön
     }
+  }
+
+  // Kullanıcı adı değiştiğinde p2p modülüne bildir
+  function updateUserName() {
+    setUserName(localUserName);
   }
 </script>
 
@@ -160,6 +180,40 @@
     font-size: 0.85rem;
     color: #555;
   }
+  .username-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    padding: 0.8rem;
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    border: 1px solid #cce7ff;
+  }
+  .username-input-group label {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  .username-input-group input {
+    flex-grow: 1;
+    padding: 0.6rem;
+    border: 1px solid #a8d5ff;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  .username-input-group button {
+    padding: 0.6rem 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+  .username-input-group button:hover {
+    background-color: #43A047;
+  }
 </style>
 
 <div class="container">
@@ -168,11 +222,28 @@
     <p>{t('smartTogetherSubtitle')}</p>
   </header>
 
+  <div class="username-input-group">
+    <label for="user-name">{t('yourName')}:</label>
+    <input
+      type="text"
+      id="user-name"
+      bind:value={localUserName}
+      placeholder={t('enterYourName')}
+      on:blur={updateUserName}
+      on:keydown={(e) => { if (e.key === 'Enter') updateUserName(); }}
+      maxlength="20"
+    />
+    <button on:click={updateUserName}>{t('save')}</button>
+  </div>
+
   <div class="status-info">
     {#if $selfPeerId}
       {t('yourPeerId')}: <span>{$selfPeerId}</span>
     {:else}
       {t('connectingToServer')}...
+    {/if}
+    {#if $selfUserName}
+        <br> {t('yourUserName')}: <span>{$selfUserName}</span>
     {/if}
     {#if $currentRoomId}
       <br> {t('currentRoom')}: <span>{$currentRoomId}</span>
@@ -200,6 +271,7 @@
         dataChannels={$dataChannels}
         on:sendData={handleSendData}
         isGameInitialized={isGameInitialized}
+        playerUserNames={$peerUserNames}
       />
     {:else}
       <p>{t('noGameSelected')}</p>
@@ -211,6 +283,6 @@
     {#each $receivedMessages as msg}
       <div>{msg}</div>
     {/each}
-    <button on:click={() => sendDataToAllPeers({ type: 'chat', message: `Merhaba, benim ID'im: ${$selfPeerId}` })}>Test Mesajı Gönder</button>
+    <button on:click={sendTestMessage}>Test Mesajı Gönder</button>
   </div>
 </div>

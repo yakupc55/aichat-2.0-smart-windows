@@ -3,7 +3,8 @@ import { t } from '$lib/lang';
 import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStudioServiceWithAddFeatureApi';
 // Eğer ollamaService'i kullanıyorsanız:
 // import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
+import { browser } from '$app/environment'; // 'browser' değişkenini import et
 
 export type Message = {
     id: string;
@@ -12,50 +13,83 @@ export type Message = {
     timestamp: Date;
 };
 
+// localStorage key'i
+const CHAT_HISTORY_STORAGE_KEY = 'chat_history';
+
+// Sohbet geçmişini localStorage'a kaydetme fonksiyonu
+function saveChatHistory(messages: Message[]) {
+    if (browser) { // Sadece tarayıcı ortamında çalıştır
+        const serializableMessages = messages.map(msg => ({
+            ...msg,
+            timestamp: msg.timestamp.toISOString()
+        }));
+        localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(serializableMessages));
+    }
+}
+
+// Sohbet geçmişini localStorage'dan yükleme fonksiyonu
+function loadChatHistory(): Message[] {
+    if (browser) { // Sadece tarayıcı ortamında çalıştır
+        const stored = localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored) as (Omit<Message, 'timestamp'> & { timestamp: string })[];
+                return parsed.map(msg => ({
+                    ...msg,
+                    timestamp: new Date(msg.timestamp)
+                }));
+            } catch (e) {
+                console.error("Failed to parse chat history from localStorage", e);
+                localStorage.removeItem(CHAT_HISTORY_STORAGE_KEY);
+                return [];
+            }
+        }
+    }
+    return []; // Sunucuda veya yükleme hatasında boş döner
+}
+
 function createChatStore() {
-    const { subscribe, update, set } = writable<Message[]>([]);
-    const isStreaming = writable(false); // isStreaming'i bir writable store olarak tanımla
+    // Başlangıç değerini localStorage'dan yükle
+    // Bu çağrı artık browser kontrolü içeriyor.
+    const initialMessages = loadChatHistory();
+    const { subscribe, update, set } = writable<Message[]>(initialMessages);
+    const isStreaming = writable(false);
+
+    // Her mesaj değişikliğinde localStorage'a kaydetmek için subscribe ol
+    // Bu abonelik, SvelteKit tarafından client-side'da çalışacak şekilde optimize edilir.
+    // Ancak yine de içinde browser kontrolü yapmak iyi bir uygulamadır, özellikle eğer subscribe'ın hemen çalışması gerekiyorsa.
+    // Burada `subscribe` doğrudan `saveChatHistory`'yi çağırdığı için sorun yok.
+    subscribe(messages => {
+        saveChatHistory(messages); // saveChatHistory zaten browser kontrolü içeriyor
+    });
 
     return {
         subscribe,
-        isStreaming, // isStreaming'i dışarıya aç
+        isStreaming,
         addDocumationMessage(documentMessage: string){
-        let infoMessage = "🛠️smart-window🧲hide-data🧲title🌟"+t('commingDataInfoText')+"🚀"+documentMessage+"🛠️"
-        const newMessage: Message = {
-            id: crypto.randomUUID(),
-            sender: 'assistant',
-            content: infoMessage, // dökümantasyon bilgisi
-            timestamp: new Date(),
-        };
-        update((messages) => [...messages, newMessage]);
+            let infoMessage = "🛠️smart-window🧲hide-data🧲title🌟"+t('commingDataInfoText')+"🚀"+documentMessage+"🛠️"
+            const newMessage: Message = {
+                id: crypto.randomUUID(),
+                sender: 'assistant',
+                content: infoMessage,
+                timestamp: new Date(),
+            };
+            update((messages) => [...messages, newMessage]);
         },
-        // documentation parametresini isteğe bağlı hale getiriyoruz
         async addMessage(userMessage: string) {
             let fullUserContent = userMessage;
-
-            // Eğer documentation varsa, kullanıcı mesajının altına ekle
-            // Markdown kod bloğu ile formatlıyoruz
 
             const newMessage: Message = {
                 id: crypto.randomUUID(),
                 sender: 'user',
-                content: fullUserContent, // Güncellenmiş içerik
+                content: fullUserContent,
                 timestamp: new Date(),
             };
            
             update((messages) => [...messages, newMessage]);
             
-            // Kullanıcı mesajını ekleyelim
-            
-
-            // Bot'un yanıtını alalım
-            // Not: LLM'e göndermek istediğiniz history'de documentation olmalı mı karar verin.
-            // Şu anki durumda, fullUserContent ile documentation da history'ye dahil olacak.
-            // Eğer LLM'in sadece saf kullanıcı sorusunu görmesini isterseniz, burada `userMessage`
-            // ile bir "geçmiş" oluşturmanız gerekebilir. Ancak genellikle context olması tercih edilir.
             const conversationHistory = this.getConversationHistory();
 
-            // Bot mesajını oluştur
             const botMessage: Message = {
                 id: crypto.randomUUID(),
                 sender: 'assistant',
@@ -63,28 +97,19 @@ function createChatStore() {
                 timestamp: new Date(),
             };
 
-            // Bot mesajını mağazaya ekleyelim (başlangıçta boş içerik)
             update((messages) => [...messages, botMessage]);
 
-            // Akış başladı
             isStreaming.set(true);
 
             try {
-                // Yanıtı akış halinde işle
-                // console.log("Sohbet geçmişi apiye gönderiliyor:");
-                // console.log(JSON.stringify(conversationHistory, null, 2));
-
-                // Kullandığınız LLM servisine göre birini uncomment edin:
-                // for await (const chunk of streamOllamaResponse(conversationHistory)) {
                 for await (const chunk of streamLMStudioResponse(conversationHistory)) {
                     update((messages) => {
                         const updatedMessages = [...messages];
                         const lastMessage = updatedMessages[updatedMessages.length - 1];
 
-                        if (lastMessage && lastMessage.sender === 'assistant') { // lastMessage kontrolü eklendi
-                            lastMessage.content += chunk; // Bot mesajına parça ekleyelim
+                        if (lastMessage && lastMessage.sender === 'assistant') {
+                            lastMessage.content += chunk;
                         }
-
                         return updatedMessages;
                     });
                 }
@@ -99,34 +124,31 @@ function createChatStore() {
                     return updatedMessages;
                 });
             } finally {
-                // Akış tamamlandı veya durduruldu
                 isStreaming.set(false);
             }
         },
 
         getConversationHistory() {
             let history: { role: string; content: string }[] = [];
-            // Bu kısım subscribe fonksiyonunu hemen çağırıp aboneliği bırakır.
-            // Anlık değeri almak için kullanılır.
-            subscribe((messages) => {
-                history = messages.map((msg) => ({
-                    role: msg.sender,
-                    content: msg.content,
-                }));
-            })(); // `()` subscribe'ı çağırıp hemen unsubscribe eder.
+            const currentMessages = get({ subscribe });
+            history = currentMessages.map((msg) => ({
+                role: msg.sender,
+                content: msg.content,
+            }));
             return history;
         },
 
         reset() {
-            set([]); // Sohbet geçmişini sıfırla
-            isStreaming.set(false); // Akış durumunu sıfırla
+            set([]);
+            isStreaming.set(false);
+            if (browser) { // Sadece tarayıcı ortamında sil
+                localStorage.removeItem(CHAT_HISTORY_STORAGE_KEY);
+            }
         },
 
         stopStreaming() {
-            // Kullanılan LLM servisine göre birini uncomment edin:
-            // ollamaStreamAbort(); // Akışı durdur
             lmStudioStreamAbort();
-            isStreaming.set(false); // Akış durumu false olsun
+            isStreaming.set(false);
         },
     };
 }

@@ -125,6 +125,13 @@ export const translations = {
         startPlayingAsManager: "Start Playing as Manager",
         stopPlaying: "Stop Playing",
         autoNextQuestion: "Auto Next Question",
+        managerPlayer: "Manager-Player",
+        becomeManagerPlayer: "Become Manager-Player",
+        yourName: "Your Name",
+        enterYourName: "Enter your name",
+        save: "Save",
+        yourUserName: "Your User Name", 
+
     },
     tr: {
         AppName: 'YZ Sohbet 2.0',
@@ -249,7 +256,13 @@ export const translations = {
         notPlaying: "Oynamıyor",
         startPlayingAsManager: "Yönetici Olarak Oynamaya Başla",
         stopPlaying: "Oynamayı Bırak",
-         autoNextQuestion: "Otomatik Sonraki Soru",
+        autoNextQuestion: "Otomatik Sonraki Soru",
+        managerPlayer: "Oynayan Yönetici",
+        becomeManagerPlayer: "Oynayan Yönetici Ol",
+        yourName: "İsminiz", 
+        enterYourName: "İsminizi girin", 
+        save: "Kaydet",
+        yourUserName: "Kullanıcı Adınız", 
     }
 };
 
