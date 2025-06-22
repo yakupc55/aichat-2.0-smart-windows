@@ -1,24 +1,29 @@
 <!-- SmartTogether.svelte -->
 <script lang="ts">
   import { t } from "$lib/lang";
-  // selfPeerId, selfRole, connectedPeers, dataChannels, receivedMessages, currentRoomId güncellemelerle birlikte import edildi
-  // selfUserName ve peerUserNames da eklendi
   import { connectSignalingServer, createRoom, joinRoom, selfPeerId, selfRole, currentRoomId, connectedPeers, dataChannels, receivedMessages, sendDataToAllPeers, disconnectP2P, selfUserName, peerUserNames, setUserName } from '$lib/p2p';
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import Lobby from './Lobby.svelte';
   import { gameTypes, getGameTypeById, type GameType } from './gameTypes';
 	import { get } from "svelte/store";
  
-  export let value: string; // Yönetici için AI'dan gelen oyun içeriği
+  export let value: string; // Yönetici için AI'dan gelen tüm oyun içeriği stringi
   
-  const SIGNALING_SERVER_URL = 'ws://localhost:3005'; // Port numarasını kontrol edin!
+  const SIGNALING_SERVER_URL = 'ws://localhost:3005'; 
 
   let view: 'lobby' | 'game' = 'lobby';
-  let selectedGameType: GameType | undefined = gameTypes[0]; // Varsayılan olarak ilk oyunu seç
-  let isGameInitialized: boolean = false; // Oyunun başlatılıp başlatılmadığını takip eden yeni state
+  let selectedGameType: GameType | undefined; 
+  let isGameInitialized: boolean = false; 
 
-  // Kullanıcı adı için lokal state
-  let localUserName: string = get(selfUserName); // p2p store'undan başlangıç değerini al
+  let localUserName: string = get(selfUserName); 
+
+  // Alt bileşene gönderilecek ayrıştırılmış value
+  let subGameValue: string = '';
+
+  // AI'dan gelen value'dan ayrıştırılan ana oyun ID'si (Quiz vb.)
+  let parsedMainGameIdFromValue: string | undefined; 
+  // AI'dan gelen value'dan ayrıştırılan alt oyun içeriği stringi
+  let parsedSubGameValueFromValue: string = '';
 
   onMount(() => {
     connectSignalingServer(SIGNALING_SERVER_URL);
@@ -26,12 +31,15 @@
     window.addEventListener('p2pPlayerLeft', handlePlayerLeft);
     window.addEventListener('p2pRoomStatus', handleRoomStatusChange);
 
-    // Kendi ismimizi p2p store'una bağla
     selfUserName.subscribe(name => {
-        if (localUserName !== name) { // Çift güncellemeden kaçın
+        if (localUserName !== name) { 
             localUserName = name;
         }
     });
+
+    // value prop'u yüklendiğinde, sadece ayrıştırma işlemini yap
+    // selectedGameType ve subGameValue ataması 'view' reaktif ifadesiyle yapılacak
+    parseIncomingValue(value);
   });
 
   onDestroy(() => {
@@ -41,34 +49,78 @@
     window.removeEventListener('p2pRoomStatus', handleRoomStatusChange);
   });
 
-function handleGlobalP2PMessage(event: Event) {
+  // value prop'u değiştiğinde AI'dan gelen değeri ayrıştır
+  $: {
+    if (value) {
+      parseIncomingValue(value);
+    }
+  }
+
+  // selectedGameType ve subGameValue'yu view state'ine göre ayarla
+  $: {
+    if (view === 'lobby') {
+      selectedGameType = gameTypes[0]; // Lobbydeyken her zaman varsayılan (Lobi) oyun tipi
+      subGameValue = ''; // Lobbydeyken alt oyuna değer göndermiyoruz
+    } else if (view === 'game') {
+      // Game görünümündeyken, ayrıştırılmış değerleri kullan
+      const game = parsedMainGameIdFromValue ? getGameTypeById(parsedMainGameIdFromValue) : undefined;
+      if (game) {
+        selectedGameType = game;
+      } else {
+        selectedGameType = gameTypes[0]; // Eğer geçerli oyun bulunamazsa yine de varsayılanı kullan
+        console.warn(`"${parsedMainGameIdFromValue || value}" ID'sine sahip ana oyun bulunamadı. Varsayılan oyun seçildi: ${gameTypes[0].name}.`);
+      }
+      subGameValue = parsedSubGameValueFromValue;
+    }
+  }
+
+  // Sadece AI'dan gelen değeri ayrıştıran fonksiyon
+  function parseIncomingValue(fullValueString: string) {
+    const firstRocketIndex = fullValueString.indexOf('🚀');
+
+    if (firstRocketIndex !== -1) {
+        const mainGamePart = fullValueString.substring(0, firstRocketIndex);
+        const mainGameMatch = mainGamePart.match(/game🌟([^🌟]+)/);
+        if (mainGameMatch && mainGameMatch[1]) {
+            parsedMainGameIdFromValue = mainGameMatch[1];
+        } else {
+            // "game🌟" kalıbı bulunamazsa, tüm ilk kısmı dene
+            parsedMainGameIdFromValue = mainGamePart; 
+        }
+        parsedSubGameValueFromValue = fullValueString.substring(firstRocketIndex + 2);
+    } else {
+        // Eğer '🚀' yoksa, tüm stringi hem ana oyun ID'si hem de alt oyun value'su olarak kabul et
+        parsedMainGameIdFromValue = fullValueString;
+        parsedSubGameValueFromValue = fullValueString;
+        console.warn("AI'dan gelen 'value' içinde '🚀' ayracı bulunamadı. Tüm string ana oyun ID'si ve alt oyun value'su olarak kabul edildi.");
+    }
+  }
+
+  function handleGlobalP2PMessage(event: Event) {
     const customEvent = event as CustomEvent;
     const message = customEvent.detail.message;
     const senderPeerId = customEvent.detail.senderPeerId;
 
     if (message.type === 'startGame' && $selfRole !== 'manager') {
       isGameInitialized = true;
-    } else if (message.type === 'endGame') { // Yönetici veya kendisi oyunu bitirdiğinde
-      isGameInitialized = false; // Oyunun bittiğini işaretle
-      // Quiz bittiğinde otomatik olarak lobie dön:
-      view = 'lobby'; // YENİ EKLENDİ / DÜZELTİLDİ
+    } else if (message.type === 'endGame') { 
+      isGameInitialized = false; 
+      view = 'lobby'; // Oyun bitince lobie dön
       console.log('Oyun sona erdi, lobie dönülüyor.');
     } else if (message.type === 'gameStatus' && $selfRole !== 'manager') {
         // ...
     } else if (message.type === 'resetQuiz' && $selfRole !== 'manager') {
         isGameInitialized = false;
-        view = 'lobby'; // Resetlendiğinde de lobie dön
+        view = 'lobby'; // Resetlenince lobie dön
     }
   }
 
   function handlePlayerLeft(event: Event) {
     const customEvent = event as CustomEvent;
-    // P2P modülündeki removePeer fonksiyonundan playerLeft geliyor
-    // Eğer tüm P2P bağlantıları koptuysa veya oda kapandıysa lobie dön
-    if (!$currentRoomId) { // Odadan çıktıysak
+    if (!$currentRoomId) { 
         view = 'lobby';
         isGameInitialized = false;
-        selectedGameType = gameTypes[0]; // Varsayılan oyun türüne sıfırla
+        // AI'dan gelen değeri tekrar ayrıştırmaya gerek yok, 'view' reaktif ifadesi halleder.
     }
   }
 
@@ -77,38 +129,40 @@ function handleGlobalP2PMessage(event: Event) {
     if (customEvent.detail.type === 'roomClosed') {
         view = 'lobby';
         isGameInitialized = false;
-        selectedGameType = gameTypes[0];
+        // AI'dan gelen değeri tekrar ayrıştırmaya gerek yok, 'view' reaktif ifadesi halleder.
         console.log("Oda kapandı, lobie dönülüyor.");
     } else if (customEvent.detail.type === 'roomCreated' && $selfRole === 'manager') {
-        isGameInitialized = false; // Yönetici olarak oda oluşturulduğunda, oyun henüz başlamaz
+        isGameInitialized = false; 
+        // Oda oluşturulduğunda view zaten 'game'e dönecek, bu da selectedGameType'ı AI'dan gelen değere göre ayarlar.
     } else if (customEvent.detail.type === 'roomJoined' && $selfRole === 'participant') {
-        isGameInitialized = false; // Katılımcı olarak odaya girildiğinde, oyun henüz başlamaz
+        isGameInitialized = false; 
+        // Odaya katılındığında view zaten 'game'e dönecek, bu da selectedGameType'ı AI'dan gelen değere göre ayarlar.
     }
   }
 
   function handleCreateRoom(e: CustomEvent) {
-    createRoom(e.detail.roomId, e.detail.gameId, e.detail.password); // Şifre ve gameId'yi p2p.ts'e ilet
-    isGameInitialized = false; // Yönetici odası oluşturulduğunda oyun başlatılmaz
+    // Oda oluşturulurken, Lobide seçili olan oyun ID'sini (yani Lobi oyun tipini) gönderiyoruz.
+    // Gerçek oyun tipi, yönetici oyunu başlattığında p2p üzerinden duyurulacak.
+    createRoom(e.detail.roomId, e.detail.gameId, e.detail.password); 
+    isGameInitialized = false; 
   }
 
   function handleJoinRoom(e: CustomEvent) {
-    joinRoom(e.detail.roomId, e.detail.password); // Şifreyi p2p.ts'e ilet
-    isGameInitialized = false; // Katılımcı olarak odaya katıldığında oyun başlatılmaz
+    joinRoom(e.detail.roomId, e.detail.password); 
+    isGameInitialized = false; 
   }
 
   function handleSendData(event: CustomEvent) {
     sendDataToAllPeers(event.detail.data);
-    // Yönetici kendi isGameInitialized state'ini buradan günceller
     if (event.detail.data.type === 'startGame' && $selfRole === 'manager') {
       isGameInitialized = true;
     } else if (event.detail.data.type === 'endGame' && $selfRole === 'manager') {
       isGameInitialized = false;
     } else if (event.detail.data.type === 'resetQuiz' && $selfRole === 'manager') {
-        isGameInitialized = false; // Yönetici resetlediyse oyun başlamamış gibi davran
+        isGameInitialized = false; 
     }
   }
 
-  // Debug için
   function sendTestMessage() {
     sendDataToAllPeers({ type: 'chat', message: `Merhaba, benim ID'im: ${$selfPeerId}, adım: ${$selfUserName}` });
   }
@@ -116,22 +170,22 @@ function handleGlobalP2PMessage(event: Event) {
   $: isConnected = $selfPeerId !== null;
   $: inRoom = $currentRoomId !== null;
 
+  // Bu reaktif ifade, odadaki durumu kontrol ederek view state'ini günceller.
   $: {
-    // Oda içindeysek ve bir rolümüz varsa oyun görünümüne geç
     if (inRoom && ($selfPeerId || $connectedPeers.size > 0) && view === 'lobby') {
-      view = 'game';
+      view = 'game'; // Odaya girildiğinde veya oda oluşturulduğunda oyun görünümüne geç
     } else if (!inRoom && view === 'game') {
         view = 'lobby'; // Odadan çıkılırsa lobie dön
     }
   }
 
-  // Kullanıcı adı değiştiğinde p2p modülüne bildir
   function updateUserName() {
     setUserName(localUserName);
   }
 </script>
 
 <style>
+  /* Stiller değişmedi */
   .container {
     /* max-width: 900px; */
     margin: 0.25rem auto;
@@ -214,7 +268,6 @@ function handleGlobalP2PMessage(event: Event) {
 
 <div class="container">
   <header class="header">
-    <!-- <h1>{t('smartTogetherTitle')}</h1> -->
     <p>{t('smartTogetherSubtitle')}</p>
   </header>
 
@@ -253,13 +306,13 @@ function handleGlobalP2PMessage(event: Event) {
       on:createRoom={handleCreateRoom}
       on:joinRoom={handleJoinRoom}
       isConnected={$selfPeerId !== null}
-      bind:selectedGameId={selectedGameType.id}
+      selectedGameId={selectedGameType ? selectedGameType.id : gameTypes[0].id}
     />
   {:else if view === 'game'}
     {#if selectedGameType}
       <svelte:component 
         this={selectedGameType.component}
-        value={value}
+        value={subGameValue} 
         currentRoomId={$currentRoomId}
         selfPeerId={$selfPeerId}
         selfRole={$selfRole}

@@ -125,7 +125,7 @@ export const translations = {
         startPlayingAsManager: "Start Playing as Manager",
         stopPlaying: "Stop Playing",
         autoNextQuestion: "Auto Next Question",
-        managerPlayer: "Manager-Player",
+        managerPlayer: "Manager Player",
         becomeManagerPlayer: "Become Manager-Player",
         yourName: "Your Name",
         enterYourName: "Enter your name",

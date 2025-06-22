@@ -2,23 +2,27 @@
 <script lang="ts">
   import { t } from "$lib/lang";
   import { createEventDispatcher } from 'svelte';
-  import { gameTypes } from './gameTypes'; // Oyun türlerini import et
+  // gameTypes artık burada kullanılmıyor, çünkü oyun tipi seçimi ana komponentte yönetiliyor.
+  // import { gameTypes } from './gameTypes'; // Kaldırıldı
 
-export let isConnected: boolean;
-  export let selectedGameId: string; // `SmartTogether`'dan bind ile gelecek
+  export let isConnected: boolean;
+  // selectedGameId artık bind ile gelmiyor, sadece okunabilir bir prop.
+  // AI tarafından belirlenen oyun tipinin ID'si buraya geçilecek.
+  export let selectedGameId: string; 
 
   const dispatch = createEventDispatcher();
   let newRoomId: string = '';
-  let createPassword: string = ''; // Yeni: Oda oluşturma şifresi
+  let createPassword: string = ''; // Oda oluşturma şifresi
   let joinRoomId: string = '';
-  let joinPassword: string = ''; // Yeni: Odaya katılma şifresi
+  let joinPassword: string = ''; // Odaya katılma şifresi
 
   function handleCreate() {
     if (newRoomId.length > 0 && newRoomId.length !== 6) {
         alert(t('roomIdMustBe6Digits'));
         return;
     }
-    dispatch('createRoom', { roomId: newRoomId || undefined, gameId: selectedGameId, password: createPassword }); // Şifreyi gönder
+    // Oda oluşturulurken AI'dan gelen selectedGameId'yi gönderiyoruz.
+    dispatch('createRoom', { roomId: newRoomId || undefined, gameId: selectedGameId, password: createPassword }); 
   }
 
   function handleJoin() {
@@ -27,7 +31,7 @@ export let isConnected: boolean;
       return;
     }
     if (joinRoomId) {
-      dispatch('joinRoom', { roomId: joinRoomId, password: joinPassword }); // Şifreyi gönder
+      dispatch('joinRoom', { roomId: joinRoomId, password: joinPassword }); 
     }
   }
 </script>
@@ -84,37 +88,24 @@ export let isConnected: boolean;
     opacity: 0.6;
     cursor: not-allowed;
   }
-  .select-game-type {
-    margin-bottom: 1rem;
-  }
-  .select-game-type label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-weight: 500;
-    color: #555;
-  }
-  .select-game-type select {
-    width: 100%;
-    padding: 0.7rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    background-color: white;
-  }
+  /* select-game-type stilleri kaldırıldı */
 </style>
 
 <div class="lobby">
   <div class="lobby-section">
     <h3>{t('createRoom')}</h3>
     
-    <!-- <div class="select-game-type">
+    <!-- Bu kısım kaldırıldı, çünkü oyun tipi seçimi ana komponentte yönetiliyor. -->
+    <!--
+    <div class="select-game-type">
       <label for="game-type">{t('selectGameType')}:</label>
       <select id="game-type" bind:value={selectedGameId}>
         {#each gameTypes as game}
           <option value={game.id}>{game.name}</option>
         {/each}
       </select>
-    </div> -->
+    </div>
+    -->
 
     <div class="input-group">
       <input type="text" bind:value={newRoomId} placeholder={t('optionalRoomId')} maxlength="6" />

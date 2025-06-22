@@ -2,7 +2,7 @@
 import { writable, get } from 'svelte/store';
 
 export const selfPeerId = writable<string | null>(null);
-export const selfRole = writable<'manager' | 'manager-player' | 'participant' | 'viewer'>('viewer'); // selfRole type güncellendi
+export const selfRole = writable<'manager' | 'managerPlayer' | 'participant' | 'viewer'>('viewer'); // selfRole type güncellendi
 export const connectedPeers = writable<Map<string, RTCPeerConnection>>(new Map());
 export const dataChannels = writable<Map<string, RTCDataChannel>>(new Map());
 export const receivedMessages = writable<string[]>([]);
@@ -293,6 +293,7 @@ export function createRoom(roomId?: string, gameId?: string, password?: string) 
             password,
             userName: get(selfUserName) // Kullanıcı adını da gönder
         }));
+        selfRole.set('manager');
     }
 }
 
@@ -304,6 +305,7 @@ export function joinRoom(roomId: string, password?: string) {
             password,
             userName: get(selfUserName) // Kullanıcı adını da gönder
         }));
+        selfRole.set('participant');
     }
 }
 

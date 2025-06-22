@@ -6,12 +6,13 @@
 	import { createMapFromSplitData, splitDataByLevel } from '$lib/utils';
 	import { get, writable, derived } from 'svelte/store';
 	// Yeni eklenen importlar
-	import { peerUserNames, selfUserName } from '$lib/p2p';
-
+	import { peerUserNames, selfRole, selfUserName } from '$lib/p2p';
+    
 	export let value: string;
+    console.log("value",value);
+    
 	export let currentRoomId: string | null;
 	export let selfPeerId: string | null;
-	export let selfRole: 'manager' | 'manager-player' | 'participant' | 'viewer';
 	export let connectedPeers: Map<string, RTCPeerConnection>;
 	export let dataChannels: Map<string, RTCDataChannel>;
 	export let isGameInitialized: boolean;
@@ -31,7 +32,7 @@
 		translation: string;
 	};
 
-	type PlayerRole = 'manager' | 'manager-player' | 'participant' | 'viewer';
+	type PlayerRole = 'manager' | 'managerPlayer' | 'participant' | 'viewer';
 	type PlayerState = {
 		peerId: string;
 		userName: string; // Yeni: Kullanıcı adı
@@ -55,25 +56,26 @@
 	let managerPeerId: string | null = null;
 
 	let autoNextQuestion: boolean = false;
-
+    
 	onMount(() => {
 		if (selfPeerId) {
 			players.update((map) => {
 				map.set(selfPeerId, {
 					peerId: selfPeerId,
 					userName: get(selfUserName) || selfPeerId, // Kendi ismini veya Peer ID'yi kullan
-					role: selfRole,
+					role: $selfRole,
 					score: 0,
 					hasAnswered: false,
 					lastAnswer: null
 				});
 				return map;
 			});
-			if (selfRole === 'manager' || selfRole === 'manager-player') {
+			if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
 				loadQuizData(value);
 				managerPeerId = selfPeerId;
 			}
 		}
+       
 		window.addEventListener('p2pMessage', handleGlobalP2PMessage);
 		window.addEventListener('p2pPlayerLeft', handlePlayerLeftEvent);
 	});
@@ -166,12 +168,12 @@
 					}
 					return map;
 				});
-				if (selfRole === 'manager' || selfRole === 'manager-player') {
+				if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
 					sendGameStatusTo(senderPeerId);
 				}
 				break;
 			case 'gameStatus':
-				if (selfRole !== 'manager' && selfRole !== 'manager-player') {
+				if ($selfRole !== 'manager' && $selfRole !== 'managerPlayer') {
 					currentQuestionIndex = message.currentQuestionIndex;
 					managerPeerId = message.managerPeerId;
 					title = message.quizTitle;
@@ -200,7 +202,7 @@
 				}
 				break;
 			case 'nextQuestion':
-				if (selfRole !== 'manager' && selfRole !== 'manager-player') {
+				if ($selfRole !== 'manager' && $selfRole !== 'managerPlayer') {
 					currentQuestionIndex = message.questionIndex;
 					players.update((map) => {
 						map.forEach((player) => {
@@ -213,7 +215,7 @@
 				}
 				break;
 			case 'answerSubmitted':
-				if (selfRole === 'manager' || selfRole === 'manager-player') {
+				if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
 					const currentQuestion = questions[currentQuestionIndex];
                     console.log("questions",questions);
                     
@@ -246,7 +248,7 @@
 				break;
 			case 'scoreStatus':
 				// Manager olmayanlar bu mesajı işleyecek
-				if (selfRole !== 'manager' && selfRole !== 'manager-player') {
+				if ($selfRole !== 'manager' && $selfRole !== 'managerPlayer') {
 					const updatedPlayerStates = new Map<string, PlayerState>();
 					message.playerStates.forEach((p: PlayerState) => {
 						// userName bilgisini playerUserNames store'undan alarak PlayerState'i güncel tut
@@ -272,7 +274,8 @@
 					return map;
 				});
 				if (message.playerPeerId === selfPeerId) {
-					selfRole = message.newRole;
+					
+                    selfRole.set(message.newRole);
 				}
 				break;
 			case 'setManager':
@@ -295,7 +298,7 @@
 					map.forEach((player) => {
 						if (
 							player.peerId !== message.managerPeerId &&
-							(player.role === 'manager' || player.role === 'manager-player')
+							(player.role === 'manager' || player.role === 'managerPlayer')
 						) {
 							player.role = 'participant';
 							map.set(player.peerId, player);
@@ -304,16 +307,17 @@
 					return map;
 				});
 				if (selfPeerId === message.managerPeerId) {
-					selfRole = 'manager';
+					$selfRole = 'manager';
 					loadQuizData(value);
-				} else if (selfRole === 'manager' || selfRole === 'manager-player') {
-					selfRole = 'participant';
+				} else if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
+
+                    selfRole.set('participant');
 				}
 				break;
 			case 'autoNextUpdate':
 				if (
-					selfRole !== 'manager' &&
-					selfRole !== 'manager-player' &&
+					$selfRole !== 'manager' &&
+					$selfRole !== 'managerPlayer' &&
 					managerPeerId === senderPeerId
 				) {
 					// Sadece yönetici olmayanlar güncellesin
@@ -343,9 +347,9 @@
 	}
 
 	function sendGameStatusTo(targetPeerId: string | 'all') {
-		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
+		if (!($selfRole === 'manager' || $selfRole === 'managerPlayer') || !selfPeerId) return;
 
-		if (questions.length === 0 && (selfRole === 'manager' || selfRole === 'manager-player')) {
+		if (questions.length === 0 && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
 			console.warn('Yönetici olarak quiz soruları henüz yüklenmemiş. Gönderilemiyor.');
 			return;
 		}
@@ -374,7 +378,7 @@
 	}
 
 	function sendScoreStatusTo(targetPeerId: string | 'all') {
-		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
+		if (!($selfRole === 'manager' || $selfRole === 'managerPlayer') || !selfPeerId) return;
 
 		const message = {
 			type: 'scoreStatus', // Yeni mesaj tipi
@@ -393,7 +397,7 @@
 	}
 
 	function managerNextQuestion() {
-		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
+		if (!($selfRole === 'manager' || $selfRole === 'managerPlayer') || !selfPeerId) return;
 
 		currentQuestionIndex++; // Soru indeksini artır
 		console.log('currentQuestionIndex', currentQuestionIndex);
@@ -428,7 +432,7 @@
 	function submitAnswer() {
 		// Sadece katılımcı veya oynayan-yönetici cevap verebilir
 		if (
-			!(selfRole === 'participant' || selfRole === 'manager-player') ||
+			!($selfRole === 'participant' || $selfRole === 'managerPlayer') ||
 			selectedAnswer === null ||
 			isAnswered ||
 			!selfPeerId
@@ -454,12 +458,12 @@
 		});
 
 		// Cevabı yöneticiye P2P üzerinden gönder.
-		if (selfRole === 'participant' && managerPeerId) {
+		if ($selfRole === 'participant' && managerPeerId) {
 			const channel = dataChannels.get(managerPeerId);
 			if (channel && channel.readyState === 'open') {
 				channel.send(JSON.stringify({ type: 'answerSubmitted', answerIndex: selectedAnswer }));
 			}
-		} else if (selfRole === 'manager-player') {
+		} else if ($selfRole === 'managerPlayer') {
 			sendScoreStatusTo('all');
 		}
 	}
@@ -486,7 +490,7 @@
 
 	function resetQuiz() {
 		resetQuizState();
-		if (selfRole === 'manager' || selfRole === 'manager-player') {
+		if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
 			dispatch('sendData', { data: { type: 'resetQuiz' } });
 			loadQuizData(value);
 		} else if (managerPeerId) {
@@ -498,17 +502,17 @@
 	}
 
 	function changeMyRole(newRole: PlayerRole) {
-		if (selfPeerId === null || newRole === selfRole) return;
+		if (selfPeerId === null || newRole === $selfRole) return;
 
 		// Yöneticilikten başka bir role geçiş
 		if (
-			(selfRole === 'manager' || selfRole === 'manager-player') &&
-			!(newRole === 'manager' || newRole === 'manager-player')
+			($selfRole === 'manager' || $selfRole === 'managerPlayer') &&
+			!(newRole === 'manager' || newRole === 'managerPlayer')
 		) {
 			const activeManagers = Array.from(get(players).values()).filter(
-				(p) => p.role === 'manager' || p.role === 'manager-player'
+				(p) => p.role === 'manager' || p.role === 'managerPlayer'
 			).length;
-			if (activeManagers === 1 && (selfRole === 'manager' || selfRole === 'manager-player')) {
+			if (activeManagers === 1 && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
 				console.warn(
 					'Tek yönetici varken yöneticilik rolünden çıkmak oyunu durdurabilir. Yeni bir yönetici atayın veya oyunu bitirin.'
 				);
@@ -521,7 +525,7 @@
 		});
 
 		// Kendi rolümüzü güncelle
-		selfRole = newRole;
+		selfRole.set(newRole);
 
 		players.update((map) => {
 			const myPlayer = map.get(selfPeerId!);
@@ -534,11 +538,11 @@
 			return map;
 		});
 
-		if (newRole === 'manager' || newRole === 'manager-player') {
+		if (newRole === 'manager' || newRole === 'managerPlayer') {
 			managerPeerId = selfPeerId;
 			loadQuizData(value);
 			dispatch('sendData', { data: { type: 'endGame' } });
-		} else if (selfRole === 'manager' || selfRole === 'manager-player') {
+		} else if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
 			// Do nothing specific here, SmartTogether will handle managerPeerId change logic.
 		}
 	}
@@ -574,9 +578,9 @@
 
 		if (selectedAnswer === index) classes.push('selected');
 
-		// Düzeltme: manager-player artık doğrudan doğru cevabı göremez.
+		// Düzeltme: managerPlayer artık doğrudan doğru cevabı göremez.
 		// Sadece manager ve viewer rolleri veya cevap verildikten sonra (isAnswered) görülebilir.
-		const canSeeCorrectAnswer = isAnswered || selfRole === 'viewer' || selfRole === 'manager';
+		const canSeeCorrectAnswer = isAnswered || $selfRole === 'viewer' || $selfRole === 'manager';
 
 		if (canSeeCorrectAnswer) {
 			const currentQuestion = questions[currentQuestionIndex];
@@ -590,7 +594,7 @@
 			if (isActuallyCorrect) classes.push('correct');
 			// Sadece kendi cevabı yanlışsa ve kendisi katılımcı veya oynayan yöneticiyse 'incorrect' işaretle
 			if (
-				(selfRole === 'participant' || selfRole === 'manager-player') &&
+				($selfRole === 'participant' || $selfRole === 'managerPlayer') &&
 				selectedAnswer === index &&
 				!isCorrect &&
 				isAnswered
@@ -604,7 +608,7 @@
 
 	$: allPlayersAnswered = (() => {
 		if (
-			!(selfRole === 'manager' || selfRole === 'manager-player') ||
+			!($selfRole === 'manager' || $selfRole === 'managerPlayer') ||
 			!isGameInitialized ||
 			questions.length === 0
 		)
@@ -614,7 +618,7 @@
 		if (!currentPlayersMap) return false;
 
 		const activePlayers = Array.from(currentPlayersMap.values()).filter(
-			(p) => p.role === 'participant' || p.role === 'manager-player'
+			(p) => p.role === 'participant' || p.role === 'managerPlayer'
 		);
 
 		if (activePlayers.length === 0) return false;
@@ -624,7 +628,7 @@
 
 	$: {
 		if (
-			(selfRole === 'manager' || selfRole === 'manager-player') &&
+			($selfRole === 'manager' || $selfRole === 'managerPlayer') &&
 			autoNextQuestion &&
 			allPlayersAnswered &&
 			currentQuestionIndex < totalQuestions
@@ -637,7 +641,7 @@
 
 	const sortedPlayers = derived(players, ($players) => {
 		return Array.from($players.values())
-			.filter((p) => p.role === 'participant' || p.role === 'manager-player')
+			.filter((p) => p.role === 'participant' || p.role === 'managerPlayer')
 			.sort((a, b) => b.score - a.score);
 	});
 
@@ -703,7 +707,7 @@
 	}
 
 	function startGameAsManager() {
-		if ((selfRole === 'manager' || selfRole === 'manager-player') && !isGameInitialized) {
+		if (($selfRole === 'manager' || $selfRole === 'managerPlayer') && !isGameInitialized) {
 			// Oyun başlamadan önce soruların yüklendiğinden emin ol
 			if (questions.length === 0) {
 				console.warn('Quiz başlatılamadı: Yönetici olarak quiz soruları henüz yüklenmemiş.');
@@ -715,12 +719,13 @@
 		}
 	}
 	function sendAutoNextState() {
-		if (selfRole === 'manager' || selfRole === 'manager-player') {
+		if ($selfRole === 'manager' || $selfRole === 'managerPlayer') {
 			dispatch('sendData', {
 				data: { type: 'autoNextUpdate', autoNextQuestion: autoNextQuestion }
 			});
 		}
 	}
+    
 </script>
 
 <div class="quiz-container">
@@ -728,31 +733,31 @@
 
 	<div class="role-selection">
 		<div class="current-role">
-			{t('yourRole')}: <strong>{t(selfRole)}</strong>
+			{t('yourRole')}: <strong>{t($selfRole)}</strong>
 		</div>
 		{#if selfPeerId && !isGameInitialized}
-			{#if selfRole !== 'manager'}
+			{#if $selfRole === 'managerPlayer'}
 				<button class="button role-manager" on:click={() => changeMyRole('manager')}>
 					{t('becomeManager')}
 				</button>
 			{/if}
-			{#if selfRole !== 'manager-player'}
-				<button class="button role-manager-player" on:click={() => changeMyRole('manager-player')}>
+			{#if $selfRole === 'manager'}
+				<button class="button role-managerPlayer" on:click={() => changeMyRole('managerPlayer')}>
 					{t('becomeManagerPlayer')}
 				</button>
 			{/if}
-			{#if selfRole !== 'participant'}
+			{#if $selfRole === 'viewer'}
 				<button class="button role-participant" on:click={() => changeMyRole('participant')}>
 					{t('becomeParticipant')}
 				</button>
 			{/if}
-			{#if selfRole !== 'viewer'}
+			{#if $selfRole === 'participant'}
 				<button class="button role-viewer" on:click={() => changeMyRole('viewer')}>
 					{t('becomeViewer')}
 				</button>
 			{/if}
 		{/if}
-		{#if selfRole === 'manager' || selfRole === 'manager-player'}
+		{#if $selfRole === 'manager' || $selfRole === 'managerPlayer'}
 			<div class="manager-controls">
 				<!-- <label class="auto-next-label">
 					<input type="checkbox" bind:checked={autoNextQuestion} on:change={sendAutoNextState} />
@@ -773,7 +778,7 @@
 		</ul>
 	</div>
 
-	{#if (selfRole === 'manager' || selfRole === 'manager-player') && !isGameInitialized}
+	{#if ($selfRole === 'manager' || $selfRole === 'managerPlayer') && !isGameInitialized}
 		<div class="button-group">
 			<button
 				class="button start-game-button"
@@ -796,10 +801,7 @@
 		{#if currentQuestionIndex < questions.length}
 			<div class="question-section">
 				<div class="progress">
-					{t('questionText')}
-					{currentQuestionIndex + 1}
-					{t('ofText')}
-					{totalQuestions}
+					{t('questionText')} {currentQuestionIndex + 1} {t('ofText')} {totalQuestions}
 				</div>
 
 				<div class="question">
@@ -813,20 +815,20 @@
 						<div
 							class={getOptionClasses(index, option)}
 							on:click={() =>
-								(selfRole === 'participant' || selfRole === 'manager-player') &&
+								($selfRole === 'participant' || $selfRole === 'managerPlayer') &&
 								!isAnswered &&
 								(selectedAnswer = index)}
-							class:disabled={!(selfRole === 'participant' || selfRole === 'manager-player') ||
+							class:disabled={!($selfRole === 'participant' || $selfRole === 'managerPlayer') ||
 								isAnswered}
 							role="option"
-							tabindex={selfRole === 'participant' || (selfRole === 'manager-player' && !isAnswered)
+							tabindex={$selfRole === 'participant' || ($selfRole === 'managerPlayer' && !isAnswered)
 								? '0'
 								: '-1'}
 							on:keydown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
 									if (
-										(selfRole === 'participant' || selfRole === 'manager-player') &&
+										($selfRole === 'participant' || $selfRole === 'managerPlayer') &&
 										!isAnswered
 									) {
 										selectedAnswer = index;
@@ -840,7 +842,7 @@
 				</div>
 
 				<div class="button-group">
-					{#if selfRole === 'participant' || selfRole === 'manager-player'}
+					{#if $selfRole === 'participant' || $selfRole === 'managerPlayer'}
 						{#if !isAnswered}
 							<button
 								class="button check-button"
@@ -861,7 +863,7 @@
 						{/if}
 					{/if}
 
-					{#if selfRole === 'manager' || selfRole === 'manager-player'}
+					{#if $selfRole === 'manager' || $selfRole === 'managerPlayer'}
 						<button
 							class="button next-button"
 							on:click={managerNextQuestion}
@@ -870,7 +872,7 @@
 							{t('nextQuestionText')}
 						</button>
 						{#if questions[currentQuestionIndex] && questions[currentQuestionIndex].explanation}
-							{#if selfRole !== 'participant'}
+							{#if $selfRole !== 'managerPlayer'}
 								<button class="button" on:click={() => (showExplanation = !showExplanation)}>
 									{showExplanation ? t('hideExplanationText') : t('showExplanationText')}
 								</button>
@@ -955,11 +957,11 @@
 	.role-manager:hover {
 		background-color: #43a047;
 	}
-	.role-manager-player {
+	.role-managerPlayer {
 		background-color: #f59e0b;
 		color: white;
 	} /* Turuncu tonu */
-	.role-manager-player:hover {
+	.role-managerPlayer:hover {
 		background-color: #d97706;
 	}
 	.role-participant {
@@ -1047,6 +1049,7 @@
 		background-color: white;
 	}
 	.progress {
+        flex-direction: column;
 		margin-bottom: 0.25rem;
 		font-size: 0.9rem;
 		color: #64748b;
