@@ -243,6 +243,7 @@ export function connectSignalingServer(url: string) {
                 break;
             case 'error':
                 console.error('Sunucudan hata:', message.message);
+                alert('Sunucudan hata:'+ message.message);
                 window.dispatchEvent(new CustomEvent('p2pError', { detail: { message: message.message } }));
                 break;
             case 'playerLeft':

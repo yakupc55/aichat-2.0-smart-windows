@@ -231,8 +231,27 @@
 						}
 						return map;
 					});
+					sendScoreStatusTo('all');
 				}
 				break;
+			case 'scoreStatus':
+				// Manager olmayanlar bu mesajı işleyecek
+				if (selfRole !== 'manager' && selfRole !== 'manager-player') {
+					const updatedPlayerStates = new Map<string, PlayerState>();
+					message.playerStates.forEach((p: PlayerState) => {
+						// userName bilgisini playerUserNames store'undan alarak PlayerState'i güncel tut
+						updatedPlayerStates.set(p.peerId, {
+							...p,
+							userName: playerUserNames.get(p.peerId) || p.peerId
+						});
+					});
+					players.set(updatedPlayerStates);
+					// Soru indeksi de güncellenebilir eğer bu mesajda geliyorsa ve ihtiyaç varsa
+					// currentQuestionIndex = message.currentQuestionIndex;
+					console.log('Katılımcı - Skor durumu güncellendi.');
+				}
+				break;
+
 			case 'playerRoleChanged':
 				players.update((map) => {
 					const player = map.get(message.playerPeerId);
@@ -339,6 +358,25 @@
 		}
 	}
 
+	function sendScoreStatusTo(targetPeerId: string | 'all') {
+		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
+
+		const message = {
+			type: 'scoreStatus', // Yeni mesaj tipi
+			playerStates: Array.from(get(players).values()),
+			currentQuestionIndex: currentQuestionIndex
+		};
+
+		if (targetPeerId === 'all') {
+			dispatch('sendData', { data: message });
+		} else {
+			const channel = dataChannels.get(targetPeerId);
+			if (channel && channel.readyState === 'open') {
+				channel.send(JSON.stringify(message));
+			}
+		}
+	}
+
 	function managerNextQuestion() {
 		if (!(selfRole === 'manager' || selfRole === 'manager-player') || !selfPeerId) return;
 
@@ -396,13 +434,14 @@
 		});
 
 		// Cevabı yöneticiye P2P üzerinden gönder.
-		// SADECE eğer ben katılımcıysam
-		if (selfRole === 'participant' && managerPeerId) {
+		if (selfRole === 'participant'  && managerPeerId) {
 			const channel = dataChannels.get(managerPeerId);
 			if (channel && channel.readyState === 'open') {
 				channel.send(JSON.stringify({ type: 'answerSubmitted', answerIndex: selectedAnswer }));
 			}
-		}
+		}else if (selfRole === 'manager-player') {
+            sendScoreStatusTo('all');
+        }
 	}
 
 	function resetForNextQuestion() {
