@@ -68,7 +68,7 @@
         selectedGameType = game;
       } else {
         selectedGameType = gameTypes[0]; // Eğer geçerli oyun bulunamazsa yine de varsayılanı kullan
-        console.warn(`"${parsedMainGameIdFromValue || value}" ID'sine sahip ana oyun bulunamadı. Varsayılan oyun seçildi: ${gameTypes[0].name}.`);
+        // console.warn(`"${parsedMainGameIdFromValue || value}" ID'sine sahip ana oyun bulunamadı. Varsayılan oyun seçildi: ${gameTypes[0].name}.`);
       }
       subGameValue = parsedSubGameValueFromValue;
     }
@@ -92,7 +92,7 @@
         // Eğer '🚀' yoksa, tüm stringi hem ana oyun ID'si hem de alt oyun value'su olarak kabul et
         parsedMainGameIdFromValue = fullValueString;
         parsedSubGameValueFromValue = fullValueString;
-        console.warn("AI'dan gelen 'value' içinde '🚀' ayracı bulunamadı. Tüm string ana oyun ID'si ve alt oyun value'su olarak kabul edildi.");
+        // console.warn("AI'dan gelen 'value' içinde '🚀' ayracı bulunamadı. Tüm string ana oyun ID'si ve alt oyun value'su olarak kabul edildi.");
     }
   }
 
@@ -101,15 +101,15 @@
     const message = customEvent.detail.message;
     const senderPeerId = customEvent.detail.senderPeerId;
 
-    if (message.type === 'startGame' && $selfRole !== 'manager') {
+    if (message.type === 'startGame' && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
       isGameInitialized = true;
     } else if (message.type === 'endGame') { 
       isGameInitialized = false; 
       view = 'lobby'; // Oyun bitince lobie dön
-      console.log('Oyun sona erdi, lobie dönülüyor.');
-    } else if (message.type === 'gameStatus' && $selfRole !== 'manager') {
+      // console.log('Oyun sona erdi, lobie dönülüyor.');
+    } else if (message.type === 'gameStatus' && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
         // ...
-    } else if (message.type === 'resetQuiz' && $selfRole !== 'manager') {
+    } else if (message.type === 'resetQuiz' && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
         isGameInitialized = false;
         view = 'lobby'; // Resetlenince lobie dön
     }
@@ -130,7 +130,7 @@
         view = 'lobby';
         isGameInitialized = false;
         // AI'dan gelen değeri tekrar ayrıştırmaya gerek yok, 'view' reaktif ifadesi halleder.
-        console.log("Oda kapandı, lobie dönülüyor.");
+        // console.log("Oda kapandı, lobie dönülüyor.");
     } else if (customEvent.detail.type === 'roomCreated' && $selfRole === 'manager') {
         isGameInitialized = false; 
         // Oda oluşturulduğunda view zaten 'game'e dönecek, bu da selectedGameType'ı AI'dan gelen değere göre ayarlar.
@@ -154,11 +154,12 @@
 
   function handleSendData(event: CustomEvent) {
     sendDataToAllPeers(event.detail.data);
-    if (event.detail.data.type === 'startGame' && $selfRole === 'manager') {
+    if (event.detail.data.type === 'startGame' && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
+      
       isGameInitialized = true;
-    } else if (event.detail.data.type === 'endGame' && $selfRole === 'manager') {
+    } else if (event.detail.data.type === 'endGame' && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
       isGameInitialized = false;
-    } else if (event.detail.data.type === 'resetQuiz' && $selfRole === 'manager') {
+    } else if (event.detail.data.type === 'resetQuiz' && ($selfRole === 'manager' || $selfRole === 'managerPlayer')) {
         isGameInitialized = false; 
     }
   }

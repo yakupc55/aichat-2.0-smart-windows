@@ -4,7 +4,7 @@ import { lmStudioStreamAbort, streamLMStudioResponse } from '$lib/Services/lmStu
 // Eğer ollamaService'i kullanıyorsanız:
 // import { ollamaStreamAbort, streamOllamaResponse } from '$lib/Services/ollamaService';
 import { writable, get } from 'svelte/store';
-import { browser } from '$app/environment'; // 'browser' değişkenini import et
+import { browser } from '$app/environment'; 
 
 export type Message = {
     id: string;
