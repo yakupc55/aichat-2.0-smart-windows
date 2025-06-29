@@ -16,6 +16,8 @@
 		word: string; // Kelimenin orijinal hali (örneğin, İngilizce)
 		translation: string; // Kelimenin çevirisi (örneğin, Türkçe)
 	};
+
+	// Quiz Durumu
 	let title = '';
 	let quizType: QuizType = 'word';
 	let questions: Question[] = [];
@@ -26,6 +28,15 @@
 	let score = 0;
 	let showExplanation = false;
 	let totalQuestions = 0;
+	let allWordPairs: WordPair[] = []; // Orijinal kelime çiftlerini saklamak için
+
+	// Ayarlar Durumu
+	let showSettings = false; // Ayarlar menüsünü göster/gizle
+	let isQuickAnswerMode = false; // Hızlı cevap modu aktif mi?
+
+	// Önceki Soru Durumu (Hızlı Cevap Modu için)
+	let previousQuestionWord: string | null = null;
+	let previousQuestionAnswer: string | null = null;
 
 	$: {
 		try {
@@ -35,30 +46,31 @@
 			title = valuesDatas.get('title');
 			quizType = valuesDatas.get('type');
 
-			if (questions.length < 1) {
+			// Yalnızca bir kez soruları oluştur
+			if (questions.length < 1 || allWordPairs.length < 1) {
 				if (quizType === 'word') {
 					const wordPairsData: string[] = valuesDatas.get('wordPairs');
 					//console.log('question data', wordPairsData);
-					// Word türü için özel işlem
-					const wordPairs: WordPair[] = []; // Kelime çiftlerini al
+					const tempWordPairs: WordPair[] = [];
 					wordPairsData.forEach((data) => {
 						let splitData = splitDataByLevel(data, 2);
 						const inputData = createMapFromSplitData(splitData, 3);
-						wordPairs.push({
+						tempWordPairs.push({
 							word: inputData.get('word'),
 							translation: inputData.get('translation')
 						});
 					});
-					questions = generateWordQuestions(wordPairs); // Soruları oluştur
+					allWordPairs = tempWordPairs; // Orijinal kelime çiftlerini sakla
+					questions = generateWordQuestions(allWordPairs, isQuickAnswerMode); // Soruları oluştur
 				} else {
 					const questionsData: string[] = valuesDatas.get('questions');
 					questionsData.forEach((data) => {
 						let splitData = splitDataByLevel(data, 2);
-						console.log('split data', splitData);
+						//console.log('split data', splitData);
 
 						const inputData = createMapFromSplitData(splitData, 3);
-						console.log('input data', inputData);
-						console.log('options', inputData.get('options'));
+						//console.log('input data', inputData);
+						//console.log('options', inputData.get('options'));
 
 						questions.push({
 							question: inputData.get('question'),
@@ -77,6 +89,13 @@
 		}
 	}
 
+	// Hızlı cevap modu değiştiğinde soruları yeniden oluştur
+	$: if (quizType === 'word' && allWordPairs.length > 0) {
+		questions = generateWordQuestions(allWordPairs, isQuickAnswerMode);
+		totalQuestions = questions.length;
+		resetQuiz(); // Sorular yeniden oluşturulduğunda quiz'i sıfırla
+	}
+
 	function checkAnswer() {
 		if (selectedAnswer === null) return;
 
@@ -88,6 +107,16 @@
 
 		isAnswered = true;
 		if (isCorrect) score++;
+
+		// Hızlı cevap modu aktifse otomatik olarak bir sonraki soruya geç
+		if (isQuickAnswerMode && quizType === 'word') {
+			// Önceki soru bilgisini kaydet
+			previousQuestionWord = currentQuestion.question;
+			previousQuestionAnswer = currentQuestion.answer as string; // Word quiz'de cevap string olacak
+			setTimeout(() => {
+				nextQuestion();
+			}, 150); // Kısa bir gecikme ile geçiş yap
+		}
 	}
 
 	function nextQuestion() {
@@ -104,9 +133,18 @@
 		isCorrect = false;
 		score = 0;
 		showExplanation = false;
+		previousQuestionWord = null;
+		previousQuestionAnswer = null;
+		// Quiz sıfırlandığında, hızlı cevap moduna göre soruları tekrar oluştur
+		if (quizType === 'word' && allWordPairs.length > 0) {
+			questions = generateWordQuestions(allWordPairs, isQuickAnswerMode);
+			totalQuestions = questions.length;
+		}
 	}
-	function generateWordQuestions(wordPairs: WordPair[]): Question[] {
+
+	function generateWordQuestions(wordPairs: WordPair[], quickMode: boolean): Question[] {
 		const questions: Question[] = [];
+		const numberOfWrongOptions = quickMode ? 2 : 3; // Hızlı modda 2 yanlış, normalde 3 yanlış
 
 		wordPairs.forEach((pair, index) => {
 			// Doğru cevap
@@ -117,8 +155,8 @@
 				.filter((_, i) => i !== index) // Mevcut kelimeyi dışarıda bırak
 				.map((p) => p.translation); // Diğer kelimelerin çevirilerini al
 
-			// Rastgele 3 yanlış cevap seçiyoruz
-			const wrongAnswers = shuffleArray(otherTranslations).slice(0, 3);
+			// Rastgele 'numberOfWrongOptions' kadar yanlış cevap seçiyoruz
+			const wrongAnswers = shuffleArray(otherTranslations).slice(0, numberOfWrongOptions);
 
 			// Tüm seçenekleri birleştiriyoruz (doğru cevap + yanlış cevaplar)
 			const options = shuffleArray([...wrongAnswers, correctAnswer]);
@@ -144,6 +182,7 @@
 		}
 		return shuffled;
 	}
+
 	// Class hesaplamayı ayrı bir fonksiyona alabiliriz
 	function getOptionClasses(
 		index: number,
@@ -171,7 +210,8 @@
 					: index === questions[currentQuestionIndex].answer;
 
 			if (isActuallyCorrect) classes.push('correct');
-			if (selectedAnswer === index && !isCorrect) classes.push('incorrect');
+			// Eğer seçilen cevap yanlışsa ve bu cevap bizim seçtiğimiz cevapsa 'incorrect' ekle
+			else if (selectedAnswer === index && !isActuallyCorrect) classes.push('incorrect');
 		}
 
 		return classes.join(' ');
@@ -180,6 +220,26 @@
 
 <div class="quiz-container">
 	<h2 class="quiz-title">{title}</h2>
+
+	<!-- Ayarlar Bölümü -->
+	<details class="settings-menu" bind:open={showSettings}>
+		<summary class="settings-summary">
+	
+			<span>{t('settingsText')}</span>
+		</summary>
+		<div class="settings-content">
+			{#if quizType === 'word'}
+				<label class="setting-item">
+					<input type="checkbox" bind:checked={isQuickAnswerMode} />
+					<span>{t('quickAnswerModeText')}</span>
+					<span class="setting-description">({t('quickAnswerModeDescription')})</span>
+				</label>
+			{:else}
+				<p class="setting-note">{t('noWordQuizSettingsText')}</p>
+			{/if}
+		</div>
+	</details>
+
 	{#if currentQuestionIndex < questions.length}
 		<div class="progress">
 			{t('questionText')} {currentQuestionIndex + 1} {t('ofText')} {totalQuestions}
@@ -204,7 +264,15 @@
 						selectedAnswer,
 						isCorrect
 					)}
-					on:click={() => !isAnswered && (selectedAnswer = index)}
+					on:click={() => {
+						if (!isAnswered) {
+							selectedAnswer = index;
+							// Hızlı cevap modu aktifse, seçer seçmez kontrol et
+							if (isQuickAnswerMode && quizType === 'word') {
+								checkAnswer();
+							}
+						}
+					}}
 				>
 					{option}
 				</div>
@@ -212,10 +280,22 @@
 		</div>
 
 		{#if !isAnswered}
-			<button class="button check-button" on:click={checkAnswer} disabled={selectedAnswer === null}>
-				{t('checkAnswerText')}
-			</button>
-			{#if selectedAnswer === null}
+			{#if !(isQuickAnswerMode && quizType === 'word')}
+				<!-- Hızlı cevap modunda kontrol butonu gizlenir -->
+				<button
+					class="button check-button"
+					on:click={checkAnswer}
+					disabled={selectedAnswer === null}
+				>
+					{t('checkAnswerText')}
+				</button>
+				{#if selectedAnswer === null}
+					<div style="color: #64748b; margin-top: 0.25rem;">
+						{t('selectOptionText')}
+					</div>
+				{/if}
+			{:else if selectedAnswer === null}
+				<!-- Hızlı cevap modunda, seçeneğe tıklandığında otomatik kontrol -->
 				<div style="color: #64748b; margin-top: 0.25rem;">
 					{t('selectOptionText')}
 				</div>
@@ -238,9 +318,21 @@
 				{/if}
 			{/if}
 
-			<button class="button next-button" on:click={nextQuestion}>
-				{t('nextQuestionText')}
-			</button>
+			{#if !(isQuickAnswerMode && quizType === 'word')}
+				<!-- Hızlı cevap modunda sonraki soru butonu gizlenir, otomatik geçiş olur -->
+				<button class="button next-button" on:click={nextQuestion}>
+					{t('nextQuestionText')}
+				</button>
+			{/if}
+		{/if}
+
+		<!-- Önceki Soru/Cevap Gösterimi (Word Quiz ve Hızlı Cevap Modu aktifken) -->
+		{#if isQuickAnswerMode && quizType === 'word' && previousQuestionWord && previousQuestionAnswer}
+			<div class="previous-qa-info">
+				<strong>{t('previousQuestionText')}:</strong>
+				<span class="previous-question-word">{previousQuestionWord}</span>
+				<span class="previous-question-answer">({previousQuestionAnswer})</span>
+			</div>
 		{/if}
 	{:else}
 		<div class="score">
@@ -258,11 +350,11 @@
 </div>
 
 <style>
-	/* Önceki stil tanımları aynı kalacak */
 	.quiz-container {
 		max-width: 800px;
 		margin: 0 auto;
 		padding: 0.25rem;
+		position: relative; /* Ayarlar menüsü için */
 	}
 	.quiz-title {
 		font-size: 1.2rem;
@@ -308,29 +400,34 @@
 		font-weight: 500;
 		cursor: pointer;
 		margin-right: 0.5rem;
+		border: 1px solid transparent; /* Varsayılan border */
+		transition:
+			background-color 0.2s,
+			border-color 0.2s;
+	}
+	.button:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 	.check-button {
 		background-color: #3b82f6;
 		color: white;
-		border: none;
 	}
-	.check-button:hover {
+	.check-button:hover:not(:disabled) {
 		background-color: #2563eb;
 	}
 	.next-button {
 		background-color: #10b981;
 		color: white;
-		border: none;
 	}
-	.next-button:hover {
+	.next-button:hover:not(:disabled) {
 		background-color: #059669;
 	}
 	.reset-button {
 		background-color: #f59e0b;
 		color: white;
-		border: none;
 	}
-	.reset-button:hover {
+	.reset-button:hover:not(:disabled) {
 		background-color: #d97706;
 	}
 	.feedback {
@@ -353,6 +450,7 @@
 		background-color: #f8fafc;
 		border-radius: 8px;
 		border-left: 4px solid #94a3b8;
+		font-size: 0.95rem;
 	}
 	.progress {
 		margin-bottom: 0.25rem;
@@ -363,5 +461,87 @@
 		font-weight: bold;
 		margin-top: 0.25rem;
 		font-size: 1.1rem;
+	}
+
+	/* Ayarlar Menüsü Stilleri */
+	.settings-menu {
+		margin-bottom: 0.5rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 8px;
+		background-color: #f8fafc;
+	}
+	.settings-summary {
+		padding: 0.5rem;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		font-weight: 500;
+		color: #475569;
+		list-style: none; /* Varsayılan ok işaretini kaldırır */
+	}
+	.settings-summary::-webkit-details-marker {
+		display: none; /* Webkit tarayıcılarda ok işaretini kaldırır */
+	}
+	.settings-summary::before {
+		content: '▶'; /* Özel ok işareti */
+		display: inline-block;
+		margin-right: 0.5rem;
+		transition: transform 0.2s;
+	}
+	.settings-menu[open] > .settings-summary::before {
+		transform: rotate(90deg); /* Açıkken oku döndür */
+	}
+	.settings-summary svg {
+		margin-right: 0.25rem;
+		color: #64748b;
+	}
+	.settings-content {
+		padding: 0.5rem;
+		border-top: 1px solid #e2e8f0;
+		background-color: #f0f4f8;
+		border-bottom-left-radius: 8px;
+		border-bottom-right-radius: 8px;
+	}
+	.setting-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 0.25rem;
+	}
+	.setting-item input[type='checkbox'] {
+		margin-right: 0.5rem;
+		cursor: pointer;
+	}
+	.setting-item span {
+		font-size: 0.95rem;
+		color: #334155;
+	}
+	.setting-description {
+		font-size: 0.8rem;
+		color: #64748b;
+		margin-left: 0.5rem;
+	}
+	.setting-note {
+		font-size: 0.9rem;
+		color: #64748b;
+		padding-left: 0.25rem;
+	}
+
+	/* Önceki Soru/Cevap Bilgisi */
+	.previous-qa-info {
+		margin-top: 1rem;
+		padding: 0.5rem;
+		background-color: #e2e8f0;
+		border-radius: 8px;
+		font-size: 0.9rem;
+		color: #334155;
+	}
+	.previous-question-word {
+		font-weight: bold;
+		margin-left: 0.25rem;
+	}
+	.previous-question-answer {
+		font-style: italic;
+		color: #475569;
+		margin-left: 0.25rem;
 	}
 </style>

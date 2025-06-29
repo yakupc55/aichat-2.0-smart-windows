@@ -48,6 +48,11 @@ export const translations = {
         ofText: "of",
         hideText: "hide",
         showText: "show",
+        settingsText: 'Settings',
+        quickAnswerModeText: 'Quick Answer Mode (Word Quiz Only)',
+        quickAnswerModeDescription: '3 options, auto next question on click.',
+        noWordQuizSettingsText: 'No specific settings for this quiz type.',
+        previousQuestionText: 'Previous:',
 
         //cümle oluşlturma çevirileri
         sentenceBuilder: "Sentence Builder",
@@ -130,7 +135,7 @@ export const translations = {
         yourName: "Your Name",
         enterYourName: "Enter your name",
         save: "Save",
-        yourUserName: "Your User Name", 
+        yourUserName: "Your User Name",
 
     },
     tr: {
@@ -179,6 +184,11 @@ export const translations = {
         ofText: "/",
         hideText: "gizle",
         showText: "göster",
+        settingsText: 'Ayarlar',
+        quickAnswerModeText: 'Hızlı Cevap Modu (Sadece Kelime Sınavı)',
+        quickAnswerModeDescription: '3 şık, tıklayınca otomatik sonraki soru.',
+        noWordQuizSettingsText: 'Bu sınav türü için özel ayar bulunmamaktadır.',
+        previousQuestionText: 'Önceki Soru:',
 
         //cümle oluşturma çevirileri
         sentenceBuilder: "Cümle oluşturma",
@@ -259,10 +269,10 @@ export const translations = {
         autoNextQuestion: "Otomatik Sonraki Soru",
         managerPlayer: "Oynayan Yönetici",
         becomeManagerPlayer: "Oynayan Yönetici Ol",
-        yourName: "İsminiz", 
-        enterYourName: "İsminizi girin", 
+        yourName: "İsminiz",
+        enterYourName: "İsminizi girin",
         save: "Kaydet",
-        yourUserName: "Kullanıcı Adınız", 
+        yourUserName: "Kullanıcı Adınız",
     }
 };
 
