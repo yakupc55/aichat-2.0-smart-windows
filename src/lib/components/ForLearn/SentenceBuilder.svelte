@@ -157,28 +157,28 @@
   .sentence-builder-container {
     max-width: 700px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 0.25rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   .builder-title {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
     font-weight: bold;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.25rem;
     color: #1a202c; /* Darker blue-gray */
     text-align: center;
   }
   .progress {
-    margin-bottom: 1rem;
+    margin-bottom: 0.25rem;
     font-size: 0.9rem;
     color: #4a5568; /* Gray */
     text-align: center;
   }
   .turkish-sentence {
     font-size: 1.3rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.25rem;
     font-weight: 500;
     color: #2d3748; /* Darker gray */
-    padding: 1rem;
+    padding: 0.25rem;
     background-color: #e2e8f0; /* Light gray */
     border-radius: 8px;
     text-align: center;
@@ -187,11 +187,11 @@
     min-height: 80px;
     border: 2px dashed #a0aec0; /* Light blue-gray dashed border */
     border-radius: 8px;
-    padding: 0.8rem;
-    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.25rem;
     align-items: center;
     background-color: #f7fafc; /* Very light gray */
     font-size: 1.1rem;
@@ -199,15 +199,15 @@
   .scrambled-words-area {
     border: 1px solid #cbd5e0; /* Lighter gray */
     border-radius: 8px;
-    padding: 0.8rem;
-    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     background-color: #edf2f7; /* Slightly darker light gray */
   }
   .word-token {
-    padding: 0.5rem 0.8rem;
+    padding: 0.5rem 0.5rem;
     background-color: #4299e1; /* Blue */
     color: white;
     border-radius: 6px;
@@ -231,11 +231,11 @@
   .button-group {
     display: flex;
     justify-content: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
   }
   .button {
-    padding: 0.7rem 1.4rem;
+    padding: 0.5rem 0.5rem;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
@@ -271,8 +271,8 @@
     transform: translateY(-1px);
   }
   .feedback {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem;
     border-radius: 8px;
     font-weight: 600;
     text-align: center;
@@ -286,8 +286,8 @@
     color: #991b1b; /* Dark red */
   }
   .explanation {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem;
     background-color: #ebf8ff; /* Light blue */
     border-radius: 8px;
     border-left: 5px solid #63b3ed; /* Blue border */
@@ -296,7 +296,7 @@
   }
   .score {
     font-weight: bold;
-    margin-top: 1.5rem;
+    margin-top: 0.25rem;
     font-size: 1.2rem;
     text-align: center;
     color: #2d3748;
@@ -304,7 +304,7 @@
   .select-word-prompt {
     color: #718096; /* Medium gray */
     text-align: center;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     font-size: 0.9rem;
   }
 </style>
